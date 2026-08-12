@@ -5,6 +5,7 @@ from __future__ import annotations
 from rpg_core.player_service import create_new_game
 from rpg_core.save_manager import SaveManager
 
+from .ai_setup import provider_setup
 from .ui import clear, menu, pause, prompt_name, title
 
 
@@ -63,10 +64,15 @@ def load_saves(manager: SaveManager) -> None:
 
 def launcher(manager: SaveManager) -> None:
     while True:
-        selected = menu("MAIN MENU", ["New Game", "Boot From Saves", "Exit"])
+        selected = menu(
+            "MAIN MENU",
+            ["New Game", "Boot From Saves", "Edit AI Provider", "Exit"],
+        )
         if selected == 0:
             new_game(manager)
         elif selected == 1:
             load_saves(manager)
+        elif selected == 2:
+            provider_setup(force=True)
         else:
             return
