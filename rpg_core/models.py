@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-SAVE_VERSION = 1
+SAVE_VERSION = 2
 BASE_XP_TO_LEVEL = 100
 START_LOCATION = "ashen-capital-gate"
 
@@ -23,6 +23,7 @@ class Player:
     max_hp: int = 100
     stat_points: int = 0
     skill_points: int = 0
+    gold: int = 25
     stats: dict[str, int] = field(
         default_factory=lambda: {
             "strength": 5,
@@ -45,14 +46,11 @@ class Player:
     )
 
     def xp_to_next_level(self) -> int:
-        """Return XP required from the current level to the next level."""
         return BASE_XP_TO_LEVEL * self.level
 
     def add_xp(self, amount: int) -> int:
-        """Add XP, process every earned level, and return levels gained."""
         if amount < 0:
             raise ValueError("XP amount cannot be negative")
-
         self.xp += amount
         gained = 0
         while self.xp >= self.xp_to_next_level():
@@ -66,7 +64,6 @@ class Player:
         return gained
 
     def spend_stat_point(self, stat: str) -> None:
-        """Increase one known stat by one point."""
         if self.stat_points <= 0:
             raise ValueError("No stat points available")
         if stat not in self.stats:
@@ -113,10 +110,13 @@ class GameState:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "GameState":
         version = int(data.get("save_version", 0))
-        if version != SAVE_VERSION:
+        if version not in {1, SAVE_VERSION}:
             raise ValueError(f"Unsupported save version: {version}")
+        player_data = dict(data["player"])
+        player_data.setdefault("gold", 25)
+        player_data.setdefault("inventory", [])
         return cls(
-            player=Player.from_dict(data["player"]),
+            player=Player.from_dict(player_data),
             location=data.get("location", START_LOCATION),
             chapter=int(data.get("chapter", 1)),
             world_flags=dict(data.get("world_flags", {})),
