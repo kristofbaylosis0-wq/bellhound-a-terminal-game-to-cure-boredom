@@ -4,60 +4,57 @@ An open-source AI-assisted terminal text RPG built collaboratively with ChatGPT.
 
 ## Install + launch
 
-### One-command install
+### Linux / macOS / Termux
 
-On Linux, macOS, or Termux, run:
+Run:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/kristofbaylosis0-wq/idk/main/install.sh | bash
 ```
 
-The installer is intentionally quiet: Git and pip output are hidden while a small progress display shows what is happening. When installation finishes, the game **automatically boots**.
+The installer is intentionally quiet: Git and pip output are hidden while a small progress display shows what is happening. When installation finishes, the game automatically boots.
 
-The installer:
+### Windows PowerShell
 
-1. Checks for Python 3.10+.
-2. Downloads the latest version of the repository.
-3. Creates an isolated Python environment.
-4. Installs the RPG and its development dependencies.
-5. Installs the `RPG` command into `~/.local/bin`.
-6. Launches the game automatically.
+Windows Terminal + PowerShell is supported too. Run:
 
-If `~/.local/bin` is not already on your `PATH`, the installer will tell you. You can add it with:
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
+```powershell
+irm https://raw.githubusercontent.com/kristofbaylosis0-wq/idk/main/install.ps1 | iex
 ```
 
-Open a new shell afterward if needed.
+The PowerShell installer downloads the repository, creates the Python virtual environment, installs the RPG, creates an `RPG` launcher in your user `bin` directory, updates your user `PATH`, and automatically boots the game.
+
+You need **Git for Windows** and **Python 3.10+** installed first.
+
+If Windows PowerShell does not recognize `RPG` after installation, restart PowerShell so the updated user `PATH` is loaded.
 
 ### Updating
 
-Run the same install command again. If the RPG is already installed, the installer updates the existing checkout and reinstalls the current version before booting it.
+Run the same installer command again for your platform. It updates the existing installation to the latest `main` branch before booting the game.
 
 ## Boot commands
 
-Open the launcher, where you can choose New Game or browse your saves:
+Open the launcher, where you can choose New Game, browse saves, edit the AI provider, or exit:
 
-```bash
+```text
 RPG game
 ```
 
 `RPG` by itself opens the same launcher:
 
-```bash
+```text
 RPG
 ```
 
-Start a new game directly without opening the launcher:
+Start a new game directly:
 
-```bash
+```text
 RPG new game
 ```
 
 Load a known save directly:
 
-```bash
+```text
 RPG Save1
 ```
 
