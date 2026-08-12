@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import getpass
+
 from rpg_ai.manager import AIManager
 from rpg_ai.models import AIMessage, AIRequest, ProviderConfig
-from rpg_ai.provider import AIProviderError
 from rpg_ai.settings import AISettings, load_settings, save_settings
 
 from .ui import clear, menu, pause, title
@@ -56,9 +57,13 @@ def _test(name: str, api_key: str | None, base_url: str | None, model: str) -> t
         return False, str(exc)
 
 
-def _ask(prompt: str, default: str | None = None) -> str:
+def _ask(prompt: str, default: str | None = None, *, secret: bool = False) -> str:
     suffix = f" [{default}]" if default else ""
-    return input(f"{prompt}{suffix}\n> ").strip() or (default or "")
+    if secret:
+        value = getpass.getpass(f"{prompt}{suffix}\n> ").strip()
+    else:
+        value = input(f"{prompt}{suffix}\n> ").strip()
+    return value or (default or "")
 
 
 def provider_setup(*, force: bool = False) -> AISettings | None:
@@ -86,14 +91,17 @@ def provider_setup(*, force: bool = False) -> AISettings | None:
         title()
         print(f"\n{_label(name)}\n")
 
-        custom_endpoint = name == "openai-compatible"
-        if custom_endpoint:
+        if name == "openai-compatible":
             base_url = _ask("Base URL", old.base_url if old else None)
-            api_key = _ask("API key (leave blank if not required)", old.api_key if old else None) or None
+            api_key = _ask("API key (leave blank if not required)", old.api_key if old else None, secret=True) or None
         else:
             base_url = None
             api_key_required = name not in {"ollama", "lm-studio", "on-device"}
-            api_key = _ask("API key (leave blank if not required)", old.api_key if old else None) or None if api_key_required else None
+            api_key = (
+                _ask("API key (leave blank if not required)", old.api_key if old else None, secret=True) or None
+                if api_key_required
+                else None
+            )
             if name in {"ollama", "lm-studio", "on-device"}:
                 override = _ask("Base URL override (leave blank for provider default)", old.base_url if old else None)
                 base_url = override or None
