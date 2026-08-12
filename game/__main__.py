@@ -8,6 +8,7 @@ from rpg_core.save_manager import SaveManager
 
 from .ai_setup import provider_setup
 from .launcher import launcher, load_saves, new_game
+from .preview import preview
 from .ui import clear, pause, title
 
 
@@ -19,7 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "target",
         nargs="*",
-        help="game, new game, or a save slot name such as Save1",
+        help="game, preview, new game, or a save slot name such as Save1",
     )
     return parser
 
@@ -52,8 +53,14 @@ def main() -> int:
     target = [part.lower() for part in args.target]
     manager = SaveManager()
 
+    # Preview is intentionally offline: it should work even before an AI
+    # provider has been configured and must never invoke story generation.
+    if target == ["preview"]:
+        preview()
+        return 0
+
     # Configure AI before the game launcher on first run. Direct commands also
-    # get the same setup so every entry point has a valid AI configuration.
+    # get the same setup so every normal entry point has a valid AI configuration.
     provider_setup()
 
     if not target or target == ["game"]:
@@ -67,7 +74,7 @@ def main() -> int:
     if len(target) == 1:
         return load_save(manager, target[0])
 
-    print("Usage: RPG game | RPG new game | RPG <save-name>")
+    print("Usage: RPG game | RPG preview | RPG new game | RPG <save-name>")
     return 2
 
 
