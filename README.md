@@ -2,33 +2,49 @@
 
 An open-source AI-assisted terminal text RPG built collaboratively with ChatGPT.
 
-## Quick start
+## Install + launch
 
-### Linux / macOS / Termux
-
-```bash
-git clone https://github.com/kristofbaylosis0-wq/idk.git
-cd idk
-chmod +x install.sh boot.sh
-./install.sh
-./boot.sh
-```
-
-After installation, you can also boot the game with:
+On Linux, macOS, or Termux, run:
 
 ```bash
-text-rpg
+curl -fsSL https://raw.githubusercontent.com/kristofbaylosis0-wq/idk/main/install.sh | bash
 ```
 
-### Windows
+The installer downloads the repository, creates its virtual environment, installs the game, creates the `RPG` command, and automatically boots the launcher.
 
-The Python entry point is:
+If `~/.local/bin` is not already on your `PATH`, add it and open a new shell:
 
-```text
-python -m game
+```bash
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-A native Windows installer/launcher can be added later.
+## Boot commands
+
+Open the launcher:
+
+```bash
+RPG game
+```
+
+Or simply:
+
+```bash
+RPG
+```
+
+Start a new game directly:
+
+```bash
+RPG new game
+```
+
+Load a known save by name:
+
+```bash
+RPG Save1
+```
+
+The launcher will also provide a save browser when you do not remember a save name.
 
 ## Development
 
