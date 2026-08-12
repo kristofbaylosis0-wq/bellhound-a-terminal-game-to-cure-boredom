@@ -14,4 +14,4 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["rpg_ai*"]
+include = ["rpg_ai*", "rpg_core*"]
