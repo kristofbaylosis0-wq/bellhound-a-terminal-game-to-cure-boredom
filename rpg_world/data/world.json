@@ -1,0 +1,140 @@
+{
+  "start_location": "ashen-capital-gate",
+  "areas": [
+    {
+      "id": "ashen-capital",
+      "name": "The Ashen Capital",
+      "description": "A vast old capital built around a dead royal district, where politics, trade, faith, and quiet conspiracies overlap.",
+      "theme": "power, memory, intrigue",
+      "atmosphere": "crowded, rain-dark, watchful",
+      "tags": ["city", "politics", "central"],
+      "locations": [
+        {"id":"ashen-capital-gate","name":"North Gate","description":"The main gate into the capital, watched by tired guards and crowded travelers.","kind":"small","tags":["entry","guards"],"connections":["ashen-market","scholar-quarter"]},
+        {"id":"ashen-market","name":"Cinder Market","description":"A sprawling market of merchants, food stalls, rumors, and stolen goods.","kind":"small","tags":["commerce","crowd"],"connections":["ashen-capital-gate","river-district"]},
+        {"id":"scholar-quarter","name":"Scholar Quarter","description":"Libraries, private colleges, cheap bookshops, and locked archives fill these streets.","kind":"small","tags":["knowledge","academia"],"connections":["ashen-capital-gate","royal-ward"]},
+        {"id":"river-district","name":"River District","description":"Warehouses, taverns, ferries, and narrow alleys follow the black river through the city.","kind":"small","tags":["dock","underworld"],"connections":["ashen-market","old-cathedral"]},
+        {"id":"old-cathedral","name":"Old Cathedral","description":"A half-repaired cathedral whose priests guard a history they refuse to discuss.","kind":"small","tags":["faith","secret"],"connections":["river-district","royal-ward"],"safe":true},
+        {"id":"royal-ward","name":"Royal Ward","description":"The surviving palace district, full of bureaucracy, ceremonies, and locked doors.","kind":"small","tags":["royal","politics"],"connections":["scholar-quarter","old-cathedral"]}
+      ],
+      "connections": []
+    },
+    {
+      "id": "greywater-coast",
+      "name": "The Greywater Coast",
+      "description": "A storm-lashed coastline where fishing villages survive beside cliffs, wrecks, and older things beneath the tide.",
+      "theme": "loss, sea, superstition",
+      "atmosphere": "windy, cold, salt-stained",
+      "tags": ["coast", "sea", "mystery"],
+      "locations": [
+        {"id":"coast-road","name":"Coast Road","description":"A dangerous road overlooking the sea and scattered wrecks.","kind":"small","tags":["road","travel"],"connections":["harbor-town","cliff-shrine"]},
+        {"id":"harbor-town","name":"Greyhook","description":"A hard-working harbor town built around salvaging and trade.","kind":"small","tags":["town","ships"],"connections":["coast-road","salt-docks","wreck-beach"],"safe":true},
+        {"id":"salt-docks","name":"Salt Docks","description":"Old piers, warehouses, and boats repaired more times than anyone remembers.","kind":"small","tags":["dock","smuggling"],"connections":["harbor-town"]},
+        {"id":"wreck-beach","name":"Wreck Beach","description":"A black-sand beach littered with ship remains exposed by the tides.","kind":"small","tags":["wrecks","loot"],"connections":["harbor-town","sea-caves"]},
+        {"id":"sea-caves","name":"Tideglass Caves","description":"Natural caves where the walls glitter with blue mineral veins and impossible echoes.","kind":"small","tags":["cave","ancient"],"connections":["wreck-beach"]},
+        {"id":"cliff-shrine","name":"Cliff Shrine","description":"A wind-battered shrine where locals leave offerings before sailing.","kind":"small","tags":["faith","omens"],"connections":["coast-road"],"safe":true}
+      ],
+      "connections": []
+    },
+    {
+      "id": "verdant-march",
+      "name": "The Verdant March",
+      "description": "A huge frontier of old forest, farm valleys, ruined roads, and communities that distrust the capital.",
+      "theme": "freedom, nature, old grudges",
+      "atmosphere": "green, misty, watchful",
+      "tags": ["forest", "frontier", "rural"],
+      "locations": [
+        {"id":"march-road","name":"March Road","description":"A muddy trade road cutting through fields and woodland.","kind":"small","tags":["road","travel"],"connections":["hearthvale","thornwood"]},
+        {"id":"hearthvale","name":"Hearthvale","description":"A farming settlement held together by stubborn locals and communal feasts.","kind":"small","tags":["village","farming"],"connections":["march-road","millstream","watch-hill"],"safe":true},
+        {"id":"millstream","name":"Millstream","description":"A quiet stream powering an old mill and several hidden footpaths.","kind":"small","tags":["river","village"],"connections":["hearthvale"]},
+        {"id":"thornwood","name":"Thornwood","description":"A dense forest where paths rearrange themselves after storms.","kind":"small","tags":["forest","danger"],"connections":["march-road","greenhouse"]},
+        {"id":"greenhouse","name":"The Greenhouse Ruins","description":"Ruins swallowed by roots, with a sealed glass chamber beneath them.","kind":"small","tags":["ruin","secret"],"connections":["thornwood"]},
+        {"id":"watch-hill","name":"Watch Hill","description":"An abandoned lookout with a view across half the March.","kind":"small","tags":["overlook","military"],"connections":["hearthvale"]}
+      ],
+      "connections": []
+    },
+    {
+      "id": "hollow-under",
+      "name": "The Hollow Under",
+      "description": "A subterranean city built into a colossal cavern beneath the surface world.",
+      "theme": "secrecy, survival, forgotten civilization",
+      "atmosphere": "humid, crowded, claustrophobic",
+      "tags": ["underground", "city", "ancient"],
+      "locations": [
+        {"id":"hollow-descent","name":"The Descent","description":"A chain of elevators and stairwells leading into darkness.","kind":"small","tags":["entry","danger"],"connections":["lantern-bazaar","old-station"]},
+        {"id":"lantern-bazaar","name":"Lantern Bazaar","description":"A crowded market lit by thousands of colored lamps.","kind":"small","tags":["market","underground"],"connections":["hollow-descent","furnace-district","low-city"],"safe":true},
+        {"id":"furnace-district","name":"Furnace District","description":"Foundries and workshops carved around a volcanic vent.","kind":"small","tags":["industry","crafting"],"connections":["lantern-bazaar"]},
+        {"id":"low-city","name":"Low City","description":"A maze of stacked homes where the city's poorest residents live.","kind":"small","tags":["residential","underworld"],"connections":["lantern-bazaar","echo-wells"]},
+        {"id":"echo-wells","name":"Echo Wells","description":"Deep shafts used for water, waste, and much stranger purposes.","kind":"small","tags":["mystery","cave"],"connections":["low-city","old-station"]},
+        {"id":"old-station","name":"Old Station","description":"A deserted transit platform from a civilization no one admits existed.","kind":"small","tags":["ancient","transit"],"connections":["hollow-descent","echo-wells"]}
+      ],
+      "connections": []
+    },
+    {
+      "id": "sunken-archive",
+      "name": "The Sunken Archive",
+      "description": "A drowned complex of libraries and observatories, reachable only after learning how the old floodgates work.",
+      "theme": "truth, history, obsession",
+      "atmosphere": "silent, flooded, uncanny",
+      "tags": ["archive", "ruin", "lore"],
+      "locations": [
+        {"id":"archive-approach","name":"Floodgate Approach","description":"A stone causeway leading toward sealed ancient floodgates.","kind":"small","tags":["entry","puzzle"],"connections":["floodgate-chamber"]},
+        {"id":"floodgate-chamber","name":"Floodgate Chamber","description":"A massive mechanism controls access to the drowned complex.","kind":"small","tags":["mechanism","puzzle"],"connections":["archive-approach","drowned-hall"]},
+        {"id":"drowned-hall","name":"Drowned Hall","description":"A monumental hall half underwater, with books floating between broken shelves.","kind":"small","tags":["archive","water"],"connections":["floodgate-chamber","glass-library"]},
+        {"id":"glass-library","name":"Glass Library","description":"A sealed library whose shelves are protected behind translucent mineral glass.","kind":"small","tags":["library","lore"],"connections":["drowned-hall","observatory"]},
+        {"id":"observatory","name":"Broken Observatory","description":"A collapsed observatory pointed toward a sky it can no longer see.","kind":"small","tags":["astronomy","secret"],"connections":["glass-library"]}
+      ],
+      "connections": []
+    },
+    {
+      "id": "ironbound-frontier",
+      "name": "The Ironbound Frontier",
+      "description": "A fortified industrial frontier where soldiers, miners, mercenaries, and inventors compete for control of dangerous resources.",
+      "theme": "industry, war, ambition",
+      "atmosphere": "smoky, loud, militarized",
+      "tags": ["frontier", "industry", "war"],
+      "locations": [
+        {"id":"frontier-road","name":"Iron Road","description":"A railway road cut through red hills and fortified checkpoints.","kind":"small","tags":["road","military"],"connections":["fort-ash","miners-camp"]},
+        {"id":"fort-ash","name":"Fort Ash","description":"A sprawling fortress controlling the region's trade routes.","kind":"small","tags":["fort","military"],"connections":["frontier-road","officers-row","gunworks"],"safe":true},
+        {"id":"miners-camp","name":"Redvein Camp","description":"A rough mining camp clustered around a rich but unstable ore seam.","kind":"small","tags":["mining","labor"],"connections":["frontier-road","deep-pit"]},
+        {"id":"officers-row","name":"Officers' Row","description":"Residences and offices for the people who command the frontier.","kind":"small","tags":["military","politics"],"connections":["fort-ash"]},
+        {"id":"gunworks","name":"Ash Gunworks","description":"A dangerous industrial complex producing weapons and experimental machinery.","kind":"small","tags":["industry","crafting"],"connections":["fort-ash"]},
+        {"id":"deep-pit","name":"Deep Pit","description":"The lowest mine shaft, where workers refuse to go below a certain marker.","kind":"small","tags":["mine","danger","secret"],"connections":["miners-camp"]}
+      ],
+      "connections": []
+    },
+    {
+      "id": "blackglass-desert",
+      "name": "The Blackglass Desert",
+      "description": "A desert of dark volcanic sand, shattered monoliths, and buried roads from a vanished empire.",
+      "theme": "ruins, survival, forbidden power",
+      "atmosphere": "blazing, empty, ancient",
+      "tags": ["desert", "ruins", "ancient"],
+      "locations": [
+        {"id":"desert-crossing","name":"Glassroad Crossing","description":"A caravan route over fused black sand.","kind":"small","tags":["road","travel"],"connections":["caravan-rest","buried-gate"]},
+        {"id":"caravan-rest","name":"Caravan Rest","description":"A fortified waystation serving traders and desert nomads.","kind":"small","tags":["town","caravan"],"connections":["desert-crossing","sunken-temple"],"safe":true},
+        {"id":"buried-gate","name":"Buried Gate","description":"A gigantic stone gate half-buried beneath the dunes.","kind":"small","tags":["ruin","secret"],"connections":["desert-crossing","monolith-field"]},
+        {"id":"monolith-field","name":"Monolith Field","description":"Tall black stones rise from the desert in mathematically impossible patterns.","kind":"small","tags":["ancient","mystery"],"connections":["buried-gate","star-well"]},
+        {"id":"sunken-temple","name":"Sunken Temple","description":"A temple whose upper halls are buried while its lower chambers remain open.","kind":"small","tags":["temple","lore"],"connections":["caravan-rest"]},
+        {"id":"star-well","name":"Star Well","description":"A deep circular shaft that reflects stars that are not visible above ground.","kind":"small","tags":["cosmic","secret"],"connections":["monolith-field"]}
+      ],
+      "connections": []
+    },
+    {
+      "id": "skygrave",
+      "name": "The Skygrave",
+      "description": "A mountainous region of floating wreckage, ruined observatories, and settlements built around impossible heights.",
+      "theme": "wonder, isolation, transcendence",
+      "atmosphere": "thin air, thunder, vast horizons",
+      "tags": ["mountains", "sky", "late-game"],
+      "locations": [
+        {"id":"skyroad","name":"Skyroad","description":"A narrow mountain road disappearing into cloudbanks.","kind":"small","tags":["road","mountain"],"connections":["cloud-haven","thunder-pass"]},
+        {"id":"cloud-haven","name":"Cloudhaven","description":"A settlement built on a natural stone shelf above the clouds.","kind":"small","tags":["town","mountain"],"connections":["skyroad","anchor-field"],"safe":true},
+        {"id":"thunder-pass","name":"Thunder Pass","description":"A storm-filled mountain pass where lightning strikes almost constantly.","kind":"small","tags":["storm","danger"],"connections":["skyroad","fallen-observatory"]},
+        {"id":"anchor-field","name":"Anchor Field","description":"Huge metal structures pin fragments of old floating ruins to the mountainside.","kind":"small","tags":["ruin","machines"],"connections":["cloud-haven","fallen-observatory"]},
+        {"id":"fallen-observatory","name":"Fallen Observatory","description":"An observatory broken across the mountain after something fell from the sky.","kind":"small","tags":["observatory","secret"],"connections":["thunder-pass","anchor-field","summit-sanctum"]},
+        {"id":"summit-sanctum","name":"Summit Sanctum","description":"A sealed sanctuary at the highest reachable point of the Skygrave.","kind":"small","tags":["endgame","sanctum"],"connections":["fallen-observatory"]}
+      ],
+      "connections": []
+    }
+  ]
+}
