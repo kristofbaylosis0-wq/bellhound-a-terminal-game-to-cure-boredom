@@ -14,8 +14,30 @@ def clear() -> None:
         print("\033[2J\033[H", end="")
 
 
+def _terminal_stream():
+    """Return the real terminal input stream, even when stdin is a pipe."""
+    if sys.stdin.isatty():
+        return sys.stdin, False
+    try:
+        return open("/dev/tty", "r", encoding="utf-8", errors="replace"), True
+    except OSError:
+        return sys.stdin, False
+
+
+def terminal_input(prompt: str = "") -> str:
+    """Read a line from the user's terminal, not an installer/curl pipe."""
+    stream, should_close = _terminal_stream()
+    try:
+        if prompt:
+            print(prompt, end="", flush=True)
+        return stream.readline().rstrip("\r\n")
+    finally:
+        if should_close:
+            stream.close()
+
+
 def pause(message: str = "Press Enter to continue...") -> None:
-    input(f"\n{message}")
+    terminal_input(f"\n{message}")
 
 
 def title() -> None:
@@ -53,10 +75,7 @@ def menu(title_text: str, options: list[str], *, footer: str = "Use ↑/↓ and 
 
 
 def read_key() -> str:
-    """Read one selection key without requiring an external UI dependency."""
-    if not sys.stdin.isatty():
-        return input("> ").strip().lower() or "enter"
-
+    """Read one selection key from the actual terminal, including curl installs."""
     if os.name == "nt":
         import msvcrt
 
@@ -71,19 +90,22 @@ def read_key() -> str:
     import termios
     import tty
 
-    fd = sys.stdin.fileno()
+    stream, should_close = _terminal_stream()
+    fd = stream.fileno()
     old = termios.tcgetattr(fd)
     try:
         tty.setraw(fd)
-        first = sys.stdin.read(1)
+        first = os.read(fd, 1).decode("utf-8", errors="ignore")
         if first in {"\r", "\n"}:
             return "enter"
         if first == "\x1b":
-            sequence = sys.stdin.read(2)
+            sequence = os.read(fd, 2).decode("utf-8", errors="ignore")
             return {"[A": "up", "[B": "down"}.get(sequence, "escape")
         return first.lower()
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        if should_close:
+            stream.close()
 
 
 def prompt_name(create: Callable[[str], object]) -> str:
@@ -92,7 +114,7 @@ def prompt_name(create: Callable[[str], object]) -> str:
         title()
         print("\nCHARACTER CREATION\n")
         print("What should the world call you?\n")
-        name = input("> ").strip()
+        name = terminal_input("> ").strip()
         try:
             create(name)
             return name
