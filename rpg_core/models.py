@@ -11,6 +11,7 @@ from typing import Any
 
 SAVE_VERSION = 1
 BASE_XP_TO_LEVEL = 100
+START_LOCATION = "ashen-capital-gate"
 
 
 @dataclass
@@ -84,7 +85,7 @@ class Player:
 @dataclass
 class GameState:
     player: Player
-    location: str = "start"
+    location: str = START_LOCATION
     chapter: int = 1
     world_flags: dict[str, Any] = field(default_factory=dict)
     quest_states: dict[str, str] = field(default_factory=dict)
@@ -116,7 +117,7 @@ class GameState:
             raise ValueError(f"Unsupported save version: {version}")
         return cls(
             player=Player.from_dict(data["player"]),
-            location=data.get("location", "start"),
+            location=data.get("location", START_LOCATION),
             chapter=int(data.get("chapter", 1)),
             world_flags=dict(data.get("world_flags", {})),
             quest_states=dict(data.get("quest_states", {})),
