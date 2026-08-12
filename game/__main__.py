@@ -6,6 +6,7 @@ import argparse
 
 from rpg_core.save_manager import SaveManager
 
+from .ai_setup import provider_setup
 from .launcher import launcher, load_saves, new_game
 from .ui import clear, pause, title
 
@@ -50,6 +51,10 @@ def main() -> int:
     args = build_parser().parse_args()
     target = [part.lower() for part in args.target]
     manager = SaveManager()
+
+    # Configure AI before the game launcher on first run. Direct commands also
+    # get the same setup so every entry point has a valid AI configuration.
+    provider_setup()
 
     if not target or target == ["game"]:
         launcher(manager)
