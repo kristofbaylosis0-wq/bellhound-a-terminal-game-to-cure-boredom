@@ -2,99 +2,165 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 from rpg_ai.manager import AIManager
-from rpg_ai.models import ProviderConfig
+from rpg_ai.models import AIMessage, AIRequest, ProviderConfig
+from rpg_ai.provider import AIProviderError
+from rpg_ai.settings import AISettings, load_settings, save_settings
 
 from .ui import clear, menu, pause, title
 
-CONFIG_DIR = Path.home() / ".config" / "text-rpg-chatgpt"
-CONFIG_PATH = CONFIG_DIR / "ai.json"
-
-
-def load_config() -> dict:
-    if not CONFIG_PATH.exists():
-        return {}
-    try:
-        return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-
-
-def save_config(data: dict) -> None:
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    CONFIG_PATH.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    try:
-        CONFIG_PATH.chmod(0o600)
-    except OSError:
-        pass
-
 
 def configured() -> bool:
-    data = load_config()
-    return bool(data.get("provider") and data.get("model"))
+    settings = load_settings()
+    return settings is not None and bool(settings.provider and settings.model)
 
 
-def provider_setup(*, force: bool = False) -> None:
-    if configured() and not force:
-        return
+def _label(name: str) -> str:
+    return {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "google": "Google Gemini",
+        "nvidia-nim": "NVIDIA NIM",
+        "openrouter": "OpenRouter",
+        "ollama": "Ollama",
+        "lm-studio": "LM Studio",
+        "on-device": "On-device / local",
+        "openai-compatible": "OpenAI-compatible custom endpoint",
+    }.get(name, name)
 
-    providers = list(AIManager.supported_providers().items())
-    names = [f"{name} — {description}" for name, description in providers]
-    names.extend(["Skip for now", "Exit"])
 
+def _config(name: str, api_key: str | None, base_url: str | None, timeout: float = 30.0) -> ProviderConfig:
+    return ProviderConfig(name=name, api_key=api_key, base_url=base_url, timeout=timeout)
+
+
+def _discover(name: str, api_key: str | None, base_url: str | None) -> list[str]:
+    provider = AIManager._provider_from_config(_config(name, api_key, base_url))
+    try:
+        return provider.list_models()
+    except Exception:
+        return []
+
+
+def _test(name: str, api_key: str | None, base_url: str | None, model: str) -> tuple[bool, str]:
+    provider = AIManager._provider_from_config(_config(name, api_key, base_url))
+    request = AIRequest(
+        messages=[AIMessage(role="user", content="Reply with exactly CONNECTION_OK")],
+        model=model,
+        temperature=0,
+        max_tokens=16,
+    )
+    try:
+        response = provider.generate(request)
+        return True, response.text.strip() or "Connection succeeded."
+    except Exception as exc:
+        return False, str(exc)
+
+
+def _ask(prompt: str, default: str | None = None) -> str:
+    suffix = f" [{default}]" if default else ""
+    return input(f"{prompt}{suffix}\n> ").strip() or (default or "")
+
+
+def provider_setup(*, force: bool = False) -> AISettings | None:
+    """Run the provider wizard. Existing valid settings are kept unless forced."""
+    existing = load_settings()
+    if existing and configured() and not force:
+        return existing
+
+    providers = list(AIManager.supported_providers().keys())
     while True:
         clear()
         title()
         print("\nAI PROVIDER SETUP\n")
-        print("The RPG uses an AI provider for dynamic dialogue and narration.")
-        print("Your provider configuration is stored locally on this device.\n")
-
-        selected = menu("CHOOSE AI PROVIDER", names)
+        print("Choose the AI backend used for dynamic dialogue, narration, and game interactions.\n")
+        labels = [_label(name) for name in providers] + ["Skip for now", "Exit"]
+        selected = menu("CHOOSE PROVIDER", labels)
         if selected == len(providers):
-            return
+            return existing
         if selected == len(providers) + 1:
             raise SystemExit(0)
 
-        provider_name = providers[selected][0]
+        name = providers[selected]
+        old = existing if existing and existing.provider == name else None
         clear()
         title()
-        print(f"\nConfigure {provider_name}\n")
-        model = input("Model name: ").strip()
+        print(f"\n{_label(name)}\n")
+
+        custom_endpoint = name == "openai-compatible"
+        if custom_endpoint:
+            base_url = _ask("Base URL", old.base_url if old else None)
+            api_key = _ask("API key (leave blank if not required)", old.api_key if old else None) or None
+        else:
+            base_url = None
+            api_key_required = name not in {"ollama", "lm-studio", "on-device"}
+            api_key = _ask("API key (leave blank if not required)", old.api_key if old else None) or None if api_key_required else None
+            if name in {"ollama", "lm-studio", "on-device"}:
+                override = _ask("Base URL override (leave blank for provider default)", old.base_url if old else None)
+                base_url = override or None
+
+        clear()
+        title()
+        print(f"\n{_label(name)} — MODEL\n")
+        print("Trying to detect models...\n")
+        models = _discover(name, api_key, base_url)
+
+        if models:
+            print("Detected models:")
+            for index, model_name in enumerate(models[:30], 1):
+                print(f"  {index}. {model_name}")
+            print("  M. Enter a model slug manually")
+            choice = _ask("Select model", "1")
+            if choice.lower() == "m":
+                model = _ask("Model slug", old.model if old else None)
+            else:
+                try:
+                    model = models[int(choice) - 1]
+                except (ValueError, IndexError):
+                    model = _ask("Model slug", old.model if old else None)
+        else:
+            print("Could not automatically detect models from this provider.")
+            print("You can enter the model slug manually.\n")
+            model = _ask("Model slug", old.model if old else None)
+
         if not model:
-            print("\nA model name is required.")
+            print("\nA model slug is required.")
             pause()
             continue
 
-        api_key = None
-        if provider_name not in {"ollama", "lm-studio", "on-device"}:
-            api_key = input("API key: ").strip() or None
+        while True:
+            clear()
+            title()
+            print("\nTEST CONNECTION\n")
+            print(f"Provider: {_label(name)}")
+            print(f"Model:    {model}")
+            if base_url:
+                print(f"Base URL: {base_url}")
+            print("\nTesting...\n")
+            ok, detail = _test(name, api_key, base_url, model)
+            if ok:
+                print("✓ Connection successful")
+                print(f"  {detail}")
+                print()
+                confirm = _ask("Save this configuration?", "Y")
+                if confirm.lower() in {"y", "yes"}:
+                    settings = AISettings(
+                        provider=name,
+                        model=model,
+                        api_key=api_key,
+                        base_url=base_url,
+                    )
+                    save_settings(settings)
+                    return settings
+                break
 
-        base_url = input("Base URL (press Enter for default): ").strip() or None
-        config = ProviderConfig(
-            name=provider_name,
-            api_key=api_key,
-            base_url=base_url,
-        )
-        try:
-            AIManager._provider_from_config(config).validate_config()
-        except Exception as exc:
-            print(f"\nProvider configuration could not be validated: {exc}")
-            print("You can save it anyway and fix the settings later.")
-            pause()
-
-        save_config({
-            "provider": provider_name,
-            "model": model,
-            "api_key": api_key,
-            "base_url": base_url,
-        })
-        clear()
-        title()
-        print(f"\n✓ {provider_name} configured.")
-        print(f"Model: {model}")
-        print(f"Config: {CONFIG_PATH}")
-        pause()
-        return
+            print("✗ Connection failed")
+            print(f"  {detail}")
+            print("\n1. Try again")
+            print("2. Change configuration")
+            print("3. Skip for now")
+            action = _ask("Choose", "2")
+            if action == "1":
+                continue
+            if action == "3":
+                return existing
+            break
