@@ -4,47 +4,64 @@ An open-source AI-assisted terminal text RPG built collaboratively with ChatGPT.
 
 ## Install + launch
 
+### One-command install
+
 On Linux, macOS, or Termux, run:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/kristofbaylosis0-wq/idk/main/install.sh | bash
 ```
 
-The installer downloads the repository, creates its virtual environment, installs the game, creates the `RPG` command, and automatically boots the launcher.
+The installer is intentionally quiet: Git and pip output are hidden while a small progress display shows what is happening. When installation finishes, the game **automatically boots**.
 
-If `~/.local/bin` is not already on your `PATH`, add it and open a new shell:
+The installer:
+
+1. Checks for Python 3.10+.
+2. Downloads the latest version of the repository.
+3. Creates an isolated Python environment.
+4. Installs the RPG and its development dependencies.
+5. Installs the `RPG` command into `~/.local/bin`.
+6. Launches the game automatically.
+
+If `~/.local/bin` is not already on your `PATH`, the installer will tell you. You can add it with:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
+Open a new shell afterward if needed.
+
+### Updating
+
+Run the same install command again. If the RPG is already installed, the installer updates the existing checkout and reinstalls the current version before booting it.
+
 ## Boot commands
 
-Open the launcher:
+Open the launcher, where you can choose New Game or browse your saves:
 
 ```bash
 RPG game
 ```
 
-Or simply:
+`RPG` by itself opens the same launcher:
 
 ```bash
 RPG
 ```
 
-Start a new game directly:
+Start a new game directly without opening the launcher:
 
 ```bash
 RPG new game
 ```
 
-Load a known save by name:
+Load a known save directly:
 
 ```bash
 RPG Save1
 ```
 
-The launcher will also provide a save browser when you do not remember a save name.
+The available manual save slots are `Save1`, `Save2`, and `Save3`. If you do not remember a save name, use `RPG game` and choose **Boot From Saves**.
 
 ## Development
 
