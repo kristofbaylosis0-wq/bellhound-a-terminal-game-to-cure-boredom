@@ -8,12 +8,16 @@ from pathlib import Path
 from .models import Area, AreaConnection, Location, World
 
 
-DEFAULT_WORLD_PATH = Path(__file__).parent / "data" / "world.json"
+DEFAULT_DATA_DIR = Path(__file__).parent / "data"
+DEFAULT_WORLD_PATH = DEFAULT_DATA_DIR / "world.json"
+DEFAULT_ROUTES_PATH = DEFAULT_DATA_DIR / "routes.json"
 
 
-def load_world(path: Path | None = None) -> World:
+def load_world(path: Path | None = None, routes_path: Path | None = None) -> World:
     source = path or DEFAULT_WORLD_PATH
+    route_source = routes_path or DEFAULT_ROUTES_PATH
     payload = json.loads(source.read_text(encoding="utf-8"))
+    route_payload = json.loads(route_source.read_text(encoding="utf-8"))
 
     areas: dict[str, Area] = {}
     locations: dict[str, Location] = {}
@@ -42,6 +46,26 @@ def load_world(path: Path | None = None) -> World:
             area.connections.append(AreaConnection(**raw_connection))
 
         areas[area.id] = area
+
+    # Global routes are stored separately so the region files stay readable.
+    for raw_connection in route_payload.get("connections", []):
+        connection = AreaConnection(**raw_connection)
+        source_location = locations[connection.from_location]
+        target_ids = list(source_location.connections)
+        if connection.to_location not in target_ids:
+            target_ids.append(connection.to_location)
+            locations[connection.from_location] = Location(
+                id=source_location.id,
+                name=source_location.name,
+                description=source_location.description,
+                parent_area=source_location.parent_area,
+                kind=source_location.kind,
+                tags=source_location.tags,
+                connections=tuple(target_ids),
+                discoverable=source_location.discoverable,
+                safe=source_location.safe,
+            )
+        areas[source_location.parent_area].connections.append(connection)
 
     return World(
         areas=areas,
