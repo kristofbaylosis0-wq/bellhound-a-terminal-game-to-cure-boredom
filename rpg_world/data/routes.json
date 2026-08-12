@@ -1,0 +1,18 @@
+{
+  "connections": [
+    {"from_location":"river-district","to_location":"coast-road","travel_description":"A ferry and coastal road connect the capital river docks to the Greywater Coast."},
+    {"from_location":"coast-road","to_location":"river-district","travel_description":"The inland road returns from the coast toward the capital."},
+    {"from_location":"royal-ward","to_location":"march-road","travel_description":"The southern gate road leaves the capital for the Verdant March."},
+    {"from_location":"march-road","to_location":"royal-ward","travel_description":"The old trade road returns north toward the capital."},
+    {"from_location":"old-cathedral","to_location":"hollow-descent","travel_description":"A sealed pilgrimage route descends beneath the cathedral into the Hollow Under."},
+    {"from_location":"hollow-descent","to_location":"old-cathedral","travel_description":"A guarded lift returns travelers to the cathedral foundations."},
+    {"from_location":"scholar-quarter","to_location":"archive-approach","travel_description":"An old scholarly expedition route leads toward the Sunken Archive."},
+    {"from_location":"archive-approach","to_location":"scholar-quarter","travel_description":"The flooded causeway leads back toward the scholars of the capital."},
+    {"from_location":"march-road","to_location":"frontier-road","travel_description":"The eastern road becomes the military Iron Road beyond the hills."},
+    {"from_location":"frontier-road","to_location":"march-road","travel_description":"The Iron Road returns west into the Verdant March."},
+    {"from_location":"miners-camp","to_location":"desert-crossing","travel_description":"A dangerous mining caravan route crosses the dry interior toward the Blackglass Desert."},
+    {"from_location":"desert-crossing","to_location":"miners-camp","travel_description":"The caravan route leads back toward the Ironbound mines."},
+    {"from_location":"star-well","to_location":"skyroad","travel_description":"A hidden mountain route rises from the desert toward the Skygrave."},
+    {"from_location":"skyroad","to_location":"star-well","travel_description":"A buried route descends from the mountains into the Blackglass Desert."}
+  ]
+}
