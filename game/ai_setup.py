@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import getpass
+import os
+import termios
+import tty
 
 from rpg_ai.manager import AIManager
 from rpg_ai.models import AIMessage, AIRequest, ProviderConfig
 from rpg_ai.settings import AISettings, load_settings, save_settings
 
-from .ui import clear, menu, pause, terminal_input, title
+from .ui import clear, menu, pause, terminal_input, title, _terminal_stream
 
 
 def configured() -> bool:
@@ -66,14 +69,83 @@ def _ask(prompt: str, default: str | None = None, *, secret: bool = False) -> st
     return value or (default or "")
 
 
-def _pick_model(models: list[str], default: str | None = None) -> str:
-    """Pick a detected model using the terminal menu, with manual slug entry."""
-    shown = models[:30]
-    options = shown + ["Enter a model slug manually"]
-    selected = menu("SELECT MODEL", options, footer="Use ↑/↓ and Enter. M also chooses manual entry.")
-    if selected == len(shown):
-        return _ask("Model slug", default)
-    return shown[selected]
+def _read_model_key() -> str:
+    """Read one key from the actual terminal, including Termux/curl installs."""
+    stream, should_close = _terminal_stream()
+    fd = stream.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        first = os.read(fd, 1).decode("utf-8", errors="ignore")
+        if first in {"\r", "\n"}:
+            return "enter"
+        if first in {"\x7f", "\x08"}:
+            return "backspace"
+        if first == "\x1b":
+            sequence = os.read(fd, 2).decode("utf-8", errors="ignore")
+            return {"[A": "up", "[B": "down"}.get(sequence, "escape")
+        if first.lower() == "m":
+            return "manual"
+        return first
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        if should_close:
+            stream.close()
+
+
+def _model_browser(models: list[str], current: str | None = None) -> str | None:
+    """Browse every detected model with scrolling and incremental search."""
+    query = ""
+    selected = 0
+    page_size = 12
+
+    while True:
+        filtered = [model for model in models if query.casefold() in model.casefold()]
+        if filtered:
+            selected %= len(filtered)
+        else:
+            selected = 0
+
+        clear()
+        title()
+        print("\nMODEL SELECTOR\n")
+        print(f"Search: {query or '(all models)'}")
+        print(f"Matches: {len(filtered)} / {len(models)}")
+        print("↑/↓ scroll  Enter select  type to search  M manual  Backspace delete  Esc clear\n")
+
+        if not filtered:
+            print("  No matching models.")
+        else:
+            start = max(0, min(selected - page_size // 2, len(filtered) - page_size))
+            end = min(len(filtered), start + page_size)
+            for index in range(start, end):
+                marker = "▸" if index == selected else " "
+                current_marker = " (current)" if current and filtered[index] == current else ""
+                print(f"{marker} {index + 1}. {filtered[index]}{current_marker}")
+            print()
+            if start > 0:
+                print("  ↑ more above")
+            if end < len(filtered):
+                print("  ↓ more below")
+
+        key = _read_model_key()
+        if key == "up" and filtered:
+            selected = (selected - 1) % len(filtered)
+        elif key == "down" and filtered:
+            selected = (selected + 1) % len(filtered)
+        elif key == "enter" and filtered:
+            return filtered[selected]
+        elif key == "manual":
+            return None
+        elif key == "escape":
+            query = ""
+            selected = 0
+        elif key == "backspace":
+            query = query[:-1]
+            selected = 0
+        elif len(key) == 1 and key.isprintable():
+            query += key
+            selected = 0
 
 
 def provider_setup(*, force: bool = False) -> AISettings | None:
@@ -123,8 +195,10 @@ def provider_setup(*, force: bool = False) -> AISettings | None:
         models = _discover(name, api_key, base_url)
 
         if models:
-            print(f"Detected {min(len(models), 30)} models.\n")
-            model = _pick_model(models, old.model if old else None)
+            print(f"Detected {len(models)} models.\n")
+            model = _model_browser(models, old.model if old else None)
+            if model is None:
+                model = _ask("Model slug")
         else:
             print("Could not automatically detect models from this provider.")
             print("You can enter the model slug manually.\n")
