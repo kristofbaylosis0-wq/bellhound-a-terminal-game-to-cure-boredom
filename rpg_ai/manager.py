@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import time
 import uuid
-from collections.abc import Iterator
-from dataclasses import dataclass
-from typing import Callable
+from dataclasses import dataclass, replace
+from typing import Callable, Iterator
 
 from .models import AIRequest, AIResponse, ProviderConfig, RetryPolicy
 from .provider import AIProvider, AIProviderError
@@ -27,15 +26,6 @@ from .providers import (
 class ProviderSpec:
     factory: Callable[[ProviderConfig], AIProvider]
     description: str
-
-
-@dataclass(frozen=True)
-class ProviderRoute:
-    """A provider plus its per-route retry/fallback settings."""
-
-    name: str
-    provider: AIProvider
-    retry_policy: RetryPolicy
 
 
 class AIManager:
@@ -116,7 +106,7 @@ class AIManager:
     def generate(self, request: AIRequest) -> AIResponse:
         """Generate a complete response with retries and provider fallback."""
         request_id = request.request_id or uuid.uuid4().hex
-        request = AIRequest(**{**request.__dict__, "request_id": request_id})
+        request = replace(request, request_id=request_id)
         errors: list[Exception] = []
 
         for provider_index, provider in enumerate(self._providers()):
@@ -132,39 +122,39 @@ class AIManager:
                     attempts=attempts,
                     fallback_used=provider_index > 0,
                 )
-            except Exception as exc:  # provider adapters normalize failures where possible
+            except Exception as exc:
                 errors.append(exc)
 
         raise AIProviderError(self._format_failure("generation", request_id, errors))
 
     def stream(self, request: AIRequest) -> Iterator[str]:
-        """Stream from the first provider that can successfully start the stream.
-
-        A fallback is attempted only before any chunks are yielded. Once output
-        reaches the caller, switching providers would duplicate or corrupt text.
-        """
+        """Stream from a provider, falling back only before any text is emitted."""
         request_id = request.request_id or uuid.uuid4().hex
-        request = AIRequest(**{**request.__dict__, "request_id": request_id, "stream": True})
+        request = replace(request, request_id=request_id, stream=True)
         errors: list[Exception] = []
 
-        for provider_index, provider in enumerate(self._providers()):
+        for provider in self._providers():
             for attempt in range(1, self._retry_policy.max_attempts + 1):
-                iterator = None
                 emitted = False
                 try:
-                    iterator = provider.stream(request)
-                    for chunk in iterator:
+                    for chunk in provider.stream(request):
                         emitted = True
                         yield chunk
                     return
                 except Exception as exc:
                     errors.append(exc)
-                    if emitted or attempt >= self._retry_policy.max_attempts:
+                    if emitted:
+                        raise AIProviderError(
+                            self._format_failure(
+                                f"streaming provider {provider.name}",
+                                request_id,
+                                errors,
+                            )
+                        ) from exc
+                    if attempt < self._retry_policy.max_attempts:
+                        self._sleep_before_retry(attempt)
+                    else:
                         break
-                    self._sleep_before_retry(attempt)
-            # Only proceed to another provider when this provider never emitted text.
-            if provider_index + 1 < len(self._providers()):
-                continue
 
         raise AIProviderError(self._format_failure("streaming", request_id, errors))
 
@@ -178,9 +168,8 @@ class AIManager:
                 return provider.generate(request), attempt
             except Exception as exc:
                 errors.append(exc)
-                if attempt >= self._retry_policy.max_attempts:
-                    break
-                self._sleep_before_retry(attempt)
+                if attempt < self._retry_policy.max_attempts:
+                    self._sleep_before_retry(attempt)
         raise AIProviderError(
             self._format_failure(f"provider {provider.name}", request.request_id or "unknown", errors)
         )
