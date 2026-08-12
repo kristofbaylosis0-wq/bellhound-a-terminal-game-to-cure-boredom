@@ -1,0 +1,95 @@
+{
+  "characters": [
+    {
+      "id": "mira_voss",
+      "name": "Mira Voss",
+      "role": "courier",
+      "area": "ashen-capital",
+      "personality": ["observant", "dry", "protective"],
+      "secret": "She has seen a living person without a shadow and has never told the city watch.",
+      "goal": "Find her missing younger brother Tomas.",
+      "fear": "That the disappearance of her brother is part of something much larger.",
+      "relationships": {"captain_eloran": -20, "brother_tomas": 80, "archivist_seren": 15},
+      "knowledge": ["capital courier routes", "sealed western tower", "three disappearances", "old bell tunnels"],
+      "arc": "Mira begins as the player's first unreliable ally. Depending on choices, she can become a trusted companion, a political enemy, or the keeper of the final key."
+    },
+    {
+      "id": "captain_eloran",
+      "name": "Captain Eloran Vale",
+      "role": "city watch commander",
+      "area": "ashen-capital",
+      "personality": ["disciplined", "tired", "authoritarian"],
+      "secret": "He knows the royal family covered up the First Silence and believes order is worth almost any cost.",
+      "goal": "Prevent panic and keep the capital functioning.",
+      "fear": "A civil war inside the city.",
+      "relationships": {"mira_voss": -20, "archivist_seren": -45, "queen_nyra": 35},
+      "knowledge": ["official royal history", "watch tunnels", "forbidden district records"],
+      "arc": "He can become an ally, tyrant, or tragic obstacle depending on whether the player exposes the royal cover-up."
+    },
+    {
+      "id": "archivist_seren",
+      "name": "Archivist Seren Quill",
+      "role": "forbidden historian",
+      "area": "ashen-capital",
+      "personality": ["curious", "eccentric", "morally flexible"],
+      "secret": "She has decoded part of the Hollow Star's operating language.",
+      "goal": "Understand the truth of the First Silence before anyone destroys the evidence.",
+      "fear": "Dying ignorant.",
+      "relationships": {"captain_eloran": -45, "mira_voss": 15},
+      "knowledge": ["First Silence", "Hollow Star", "royal archive", "sunken archive access"],
+      "arc": "Seren can give the player the knowledge needed to repair the Hollow Star—or the knowledge needed to deliberately open it."
+    },
+    {
+      "id": "tomas_voss",
+      "name": "Tomas Voss",
+      "role": "missing courier apprentice",
+      "area": "hollow-under",
+      "personality": ["kind", "reckless", "lonely"],
+      "secret": "He followed a voice beneath the city and has started hearing the Hollow Star speak in his dreams.",
+      "goal": "Return home without bringing the thing beneath the city with him.",
+      "fear": "That he is becoming part of the machine.",
+      "relationships": {"mira_voss": 80, "player": 0},
+      "knowledge": ["hidden stairways", "bell tunnels", "living darkness"],
+      "arc": "Tomas can be rescued, sacrificed, or transformed. His outcome strongly affects Mira and several endings."
+    },
+    {
+      "id": "queen_nyra",
+      "name": "Queen Nyra Vael",
+      "role": "ruler of the Ashen Crown",
+      "area": "ashen-capital",
+      "personality": ["composed", "calculating", "genuinely protective"],
+      "secret": "Her bloodline descends from the engineers who built the Hollow Star's prison.",
+      "goal": "Preserve the kingdom long enough to find a permanent solution.",
+      "fear": "Being forced to choose between the kingdom and the world's safety.",
+      "relationships": {"captain_eloran": 35, "archivist_seren": -70},
+      "knowledge": ["royal vault", "Hollow Star seals", "old pact", "true purpose of the crown"],
+      "arc": "Nyra can become a patron, antagonist, sacrifice, or uneasy partner."
+    },
+    {
+      "id": "the_bellkeeper",
+      "name": "The Bellkeeper",
+      "role": "masked wanderer",
+      "area": "greywater-coast",
+      "personality": ["cryptic", "patient", "merciless"],
+      "secret": "The Bellkeeper is one of the original seven people who survived the First Silence unchanged.",
+      "goal": "Stop anyone from repeating the mistake that created the Hollow Star.",
+      "fear": "That humanity will choose curiosity over survival again.",
+      "relationships": {},
+      "knowledge": ["First Silence", "Hollow Star", "seven keys", "lost coast observatory"],
+      "arc": "The Bellkeeper slowly reveals that the supposedly heroic history of the kingdom is a lie."
+    },
+    {
+      "id": "vesper_raine",
+      "name": "Vesper Raine",
+      "role": "leader of the Ashen Hand",
+      "area": "blackglass-desert",
+      "personality": ["charismatic", "pragmatic", "dangerously idealistic"],
+      "secret": "Vesper believes the thing beneath the world can end all war if properly awakened.",
+      "goal": "Break the royal monopoly on the Hollow Star's secrets.",
+      "fear": "A world where the same rulers simply inherit the same lies.",
+      "relationships": {"queen_nyra": -60, "archivist_seren": 20},
+      "knowledge": ["desert ruins", "forbidden mechanisms", "Ashen Hand routes"],
+      "arc": "Vesper can become a temporary ally, revolutionary leader, or final antagonist."
+    }
+  ]
+}
