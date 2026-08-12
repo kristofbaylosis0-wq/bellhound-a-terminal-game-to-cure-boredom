@@ -2,17 +2,39 @@
 
 An open-source AI-assisted terminal text RPG built collaboratively with ChatGPT.
 
-## Vision
+## Quick start
 
-A replayable, story-heavy text RPG with a large branching narrative, many endings, persistent world state, and thousands of meaningful interactions.
+### Linux / macOS / Termux
 
-The game uses a deterministic rules engine for canon and state, while AI can provide dynamic narration, dialogue, interpretation of player intent, and other presentation.
+```bash
+git clone https://github.com/kristofbaylosis0-wq/idk.git
+cd idk
+chmod +x install.sh boot.sh
+./install.sh
+./boot.sh
+```
 
-## AI provider support
+After installation, you can also boot the game with:
 
-The provider layer is designed to keep the game independent from any particular model or vendor.
+```bash
+text-rpg
+```
 
-Currently supported adapters:
+### Windows
+
+The Python entry point is:
+
+```text
+python -m game
+```
+
+A native Windows installer/launcher can be added later.
+
+## Development
+
+The project is currently building its core systems: AI providers/runtime, persistent game state, player progression, terminal UI, inventory, and world topology. Story, dialogue, quests, characters, and endings will be layered on top of this foundation.
+
+## AI providers
 
 - OpenAI
 - Anthropic
@@ -22,35 +44,6 @@ Currently supported adapters:
 - Ollama
 - LM Studio
 - Generic OpenAI-compatible endpoints
-- On-device/local OpenAI-compatible endpoints
+- On-device/local endpoints
 
-NVIDIA NIM is supported through its OpenAI-compatible inference API, so hosted and self-hosted NIM deployments can use the same adapter pattern.
-
-## Provider architecture
-
-```text
-RPG engine
-    |
-    v
-AIManager
-    |
-    +-- OpenAI
-    +-- Anthropic
-    +-- Google Gemini
-    +-- NVIDIA NIM
-    +-- OpenRouter
-    +-- Ollama
-    +-- LM Studio
-    +-- On-device / local endpoint
-    +-- Generic OpenAI-compatible API
-```
-
-Important game state is never supposed to be controlled solely by the model. The engine owns rules, canon, quests, relationships, inventory, flags, and other authoritative state.
-
-## Security
-
-API keys must be supplied through environment variables or a future local configuration layer. Secrets must never be committed to the repository.
-
-## Development
-
-This project is currently in the provider-abstraction stage. The RPG engine, world, story, dialogue system, memory, quests, and endings will be built on top of this foundation.
+Important game state remains authoritative in the game engine; AI is used for dynamic presentation and interpretation rather than being trusted to arbitrarily rewrite canon.
