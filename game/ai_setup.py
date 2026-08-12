@@ -8,7 +8,7 @@ from rpg_ai.manager import AIManager
 from rpg_ai.models import AIMessage, AIRequest, ProviderConfig
 from rpg_ai.settings import AISettings, load_settings, save_settings
 
-from .ui import clear, menu, pause, title
+from .ui import clear, menu, pause, terminal_input, title
 
 
 def configured() -> bool:
@@ -62,8 +62,18 @@ def _ask(prompt: str, default: str | None = None, *, secret: bool = False) -> st
     if secret:
         value = getpass.getpass(f"{prompt}{suffix}\n> ").strip()
     else:
-        value = input(f"{prompt}{suffix}\n> ").strip()
+        value = terminal_input(f"{prompt}{suffix}\n> ").strip()
     return value or (default or "")
+
+
+def _pick_model(models: list[str], default: str | None = None) -> str:
+    """Pick a detected model using the terminal menu, with manual slug entry."""
+    shown = models[:30]
+    options = shown + ["Enter a model slug manually"]
+    selected = menu("SELECT MODEL", options, footer="Use ↑/↓ and Enter. M also chooses manual entry.")
+    if selected == len(shown):
+        return _ask("Model slug", default)
+    return shown[selected]
 
 
 def provider_setup(*, force: bool = False) -> AISettings | None:
@@ -113,18 +123,8 @@ def provider_setup(*, force: bool = False) -> AISettings | None:
         models = _discover(name, api_key, base_url)
 
         if models:
-            print("Detected models:")
-            for index, model_name in enumerate(models[:30], 1):
-                print(f"  {index}. {model_name}")
-            print("  M. Enter a model slug manually")
-            choice = _ask("Select model", "1")
-            if choice.lower() == "m":
-                model = _ask("Model slug", old.model if old else None)
-            else:
-                try:
-                    model = models[int(choice) - 1]
-                except (ValueError, IndexError):
-                    model = _ask("Model slug", old.model if old else None)
+            print(f"Detected {min(len(models), 30)} models.\n")
+            model = _pick_model(models, old.model if old else None)
         else:
             print("Could not automatically detect models from this provider.")
             print("You can enter the model slug manually.\n")
