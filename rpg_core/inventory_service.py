@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .items import DEFAULT_ITEMS, Inventory, InventoryError, Item
+from .items import DEFAULT_ITEMS, Inventory, InventoryEntry, InventoryError, Item
 from .models import GameState
 
 EQUIPMENT_SLOTS = {"weapon", "armor", "accessory"}
@@ -12,7 +12,7 @@ def inventory_for(state: GameState) -> Inventory:
     counts: dict[str, int] = {}
     for item_id in state.player.inventory:
         counts[item_id] = counts.get(item_id, 0) + 1
-    return Inventory([{"item_id": item_id, "quantity": quantity} for item_id, quantity in counts.items()])
+    return Inventory([InventoryEntry(item_id, quantity) for item_id, quantity in counts.items()])
 
 
 def _write_inventory(state: GameState, inventory: Inventory) -> None:
