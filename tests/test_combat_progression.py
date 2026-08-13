@@ -2,7 +2,15 @@ import random
 
 import pytest
 
-from rpg_core.combat import Enemy, CombatantState, calculate_damage, perform_enemy_attack, player_attack_power, player_defense, resolve_combat
+from rpg_core.combat import (
+    CombatantState,
+    Enemy,
+    calculate_damage,
+    perform_enemy_attack,
+    player_attack_power,
+    player_defense,
+    resolve_combat,
+)
 from rpg_core.player_service import create_new_game
 from rpg_core.skills import available_skills, learn_skill, skill_rank
 from rpg_core.progression import grant_xp
@@ -72,4 +80,5 @@ def test_xp_can_cross_multiple_levels_without_losing_remainder():
     gained = grant_xp(state, 1000)
     assert gained >= 3
     assert state.player.xp >= 0
-    assert state.player.stat_points == state.player.level - 1 | 0
+    assert state.player.stat_points == gained * 3
+    assert state.player.skill_points == gained
