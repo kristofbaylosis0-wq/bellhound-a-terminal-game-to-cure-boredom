@@ -31,6 +31,8 @@ class FakeProvider(AIProvider):
 
     def stream(self, request: AIRequest):
         self.calls += 1
+        if self.calls <= self.failures:
+            raise RuntimeError("temporary failure")
         if self.stream_failure:
             yield "partial"
             raise RuntimeError("stream broke")
