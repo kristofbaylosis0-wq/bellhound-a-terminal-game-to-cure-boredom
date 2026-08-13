@@ -1,0 +1,44 @@
+{
+  "training_ground": {
+    "name": "Training Grounds",
+    "type": "leveling",
+    "features": ["training", "sparring", "combat_lessons", "weapon_drills"],
+    "actions": ["train_strength", "train_agility", "spar", "learn_combat"]
+  },
+  "shop": {
+    "name": "General Shop",
+    "type": "buying",
+    "features": ["buy", "sell", "haggle", "appraise"],
+    "actions": ["buy", "sell", "haggle", "appraise"]
+  },
+  "blacksmith": {
+    "name": "Blacksmith",
+    "type": "crafting",
+    "features": ["buy", "sell", "repair", "forge", "salvage"],
+    "actions": ["buy", "sell", "repair", "forge", "salvage"]
+  },
+  "guild": {
+    "name": "Adventurer Guild",
+    "type": "contracts",
+    "features": ["quests", "bounties", "rankings", "parties"],
+    "actions": ["accept_contract", "collect_bounty", "rank_up"]
+  },
+  "temple": {
+    "name": "Temple",
+    "type": "spiritual",
+    "features": ["healing", "prayer", "lore", "divine_signs"],
+    "actions": ["heal", "pray", "learn_lore", "divine_listen"]
+  },
+  "library": {
+    "name": "Library",
+    "type": "knowledge",
+    "features": ["research", "translation", "lore_archive"],
+    "actions": ["research", "translate", "record_lore"]
+  },
+  "tavern": {
+    "name": "Tavern",
+    "type": "social",
+    "features": ["rumors", "rest", "drinks", "meetings"],
+    "actions": ["rumor", "rest", "drink", "meet"]
+  }
+}
