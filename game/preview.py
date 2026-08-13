@@ -1,13 +1,10 @@
-"""Offline showcase for terminal RPG systems.
-
-This command deliberately avoids story generation and AI calls except when the
-user explicitly opens the AI Provider Setup preview.
-"""
+"""Offline showcase for terminal RPG systems."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
+from rpg_core.achievements import ACHIEVEMENTS, evaluate
 from rpg_core.inventory_service import equipped_items, inventory_for
 from rpg_core.items import DEFAULT_ITEMS
 from rpg_core.player_service import create_new_game
@@ -107,6 +104,20 @@ def _show_facilities() -> None:
     pause()
 
 
+def _show_achievements() -> None:
+    state = create_new_game("Preview Hero")
+    state.world_flags.update({"bell_07_silent": True, "first_divine_echo": True, "twenty_seven_missing": True})
+    state.discovered_lore.extend(["a", "b", "c", "d", "e"])
+    evaluate(state)
+    clear(); title(); print("\nACHIEVEMENTS\n")
+    unlocked = set(state.achievements)
+    for achievement in ACHIEVEMENTS.values():
+        mark = "✓" if achievement.id in unlocked else "·"
+        print(f" {mark} {achievement.name:<24} — {achievement.description}")
+    print(f"\nUnlocked: {len(unlocked)} / {len(ACHIEVEMENTS)}")
+    pause()
+
+
 def _show_placeholder(name: str, lines: list[str]) -> None:
     clear(); title(); print(f"\n{name}\n")
     for line in lines: print(line)
@@ -117,6 +128,7 @@ def _show_systems() -> None:
     selected = menu("PREVIEW SYSTEMS", [
         "Core Character Systems",
         "Complete UI Showcase",
+        "Achievements",
         "AI Provider Setup",
         "Save Slots",
         "World / Area Browser",
@@ -141,11 +153,13 @@ def _show_systems() -> None:
     elif selected == 1:
         systems_showcase()
     elif selected == 2:
+        _show_achievements()
+    elif selected == 3:
         from .ai_setup import provider_setup
         provider_setup(force=True)
-    elif selected == 3:
-        _show_placeholder("SAVE SLOTS", ["Save1 — Preview Hero, Lv.1", "Save2 — EMPTY", "Save3 — EMPTY"])
     elif selected == 4:
+        _show_placeholder("SAVE SLOTS", ["Save1 — Preview Hero, Lv.1", "Save2 — EMPTY", "Save3 — EMPTY"])
+    elif selected == 5:
         _show_placeholder("WORLD / AREA BROWSER", [
             "The Ashen Capital", "The Greywater Coast", "The Verdant March", "The Hollow Under",
             "The Sunken Archive", "The Ironbound Frontier", "The Blackglass Desert", "The Skygrave",
