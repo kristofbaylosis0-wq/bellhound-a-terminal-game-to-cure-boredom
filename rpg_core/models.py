@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-SAVE_VERSION = 4
+SAVE_VERSION = 5
 START_LOCATION = "ashen-capital-gate"
 DIVINE_DOMAINS = (
     "strength", "shadows", "knowledge", "war", "life", "death",
@@ -19,6 +19,7 @@ DEFAULT_STATS = {
     "strength": 5, "agility": 5, "endurance": 5,
     "intelligence": 5, "willpower": 5, "charisma": 5, "luck": 5,
 }
+STORY_MODES = ("handcrafted", "dynamic")
 
 
 def default_divine_affinity() -> dict[str, float]:
@@ -52,7 +53,7 @@ class Player:
 
     def add_xp(self, amount: int) -> int:
         """Add XP and return the number of levels gained.
-        
+
         Each level awards 3 stat points and 1 skill point.
         """
         if amount < 0:
@@ -104,6 +105,7 @@ class GameState:
     chapter: int = 1
     current_story_node: str = "ch1_arrival"
     checkpoint_node: str = "ch1_arrival"
+    story_mode: str = "handcrafted"
     world_flags: dict[str, Any] = field(default_factory=dict)
     quest_states: dict[str, str] = field(default_factory=dict)
     relationships: dict[str, int] = field(default_factory=dict)
@@ -114,6 +116,10 @@ class GameState:
     achievements: list[str] = field(default_factory=list)
     random_seed: int | None = None
 
+    def __post_init__(self) -> None:
+        if self.story_mode not in STORY_MODES:
+            raise ValueError(f"Unknown story mode: {self.story_mode}")
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "save_version": SAVE_VERSION,
@@ -122,6 +128,7 @@ class GameState:
             "chapter": self.chapter,
             "current_story_node": self.current_story_node,
             "checkpoint_node": self.checkpoint_node,
+            "story_mode": self.story_mode,
             "world_flags": self.world_flags,
             "quest_states": self.quest_states,
             "relationships": self.relationships,
@@ -136,7 +143,7 @@ class GameState:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "GameState":
         version = int(data.get("save_version", 0))
-        if version not in {1, 2, 3, SAVE_VERSION}:
+        if version not in {1, 2, 3, 4, SAVE_VERSION}:
             raise ValueError(f"Unsupported save version: {version}")
         divine = default_divine_affinity()
         for key, value in data.get("divine_affinity", {}).items():
@@ -148,6 +155,7 @@ class GameState:
             chapter=int(data.get("chapter", 1)),
             current_story_node=str(data.get("current_story_node", "ch1_arrival")),
             checkpoint_node=str(data.get("checkpoint_node", data.get("current_story_node", "ch1_arrival"))),
+            story_mode=str(data.get("story_mode", "handcrafted")),
             world_flags=dict(data.get("world_flags", {})),
             quest_states=dict(data.get("quest_states", {})),
             relationships={k: int(v) for k, v in data.get("relationships", {}).items()},
