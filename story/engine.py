@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from rpg_core.achievements import evaluate
+from rpg_core.items import DEFAULT_ITEMS
 from rpg_core.player_service import grant_xp
 from rpg_core.progression import can_use_action, record_action, refresh_prediction
 from rpg_core.save_manager import SaveManager
@@ -21,9 +22,10 @@ class StoryError(ValueError):
 
 
 class StoryEngine:
-    def __init__(self, state, manager: SaveManager | None = None) -> None:
+    def __init__(self, state, manager: SaveManager | None = None, *, save_slot: int = 1) -> None:
         self.state = state
         self.manager = manager
+        self.save_slot = save_slot
         self.chapters: dict[int, dict[str, Any]] = {}
         evaluate(self.state)
 
@@ -46,6 +48,18 @@ class StoryEngine:
         return {str(node["id"]): node for node in self._load_chapter(chapter).get("beats", [])}
 
     def _node(self, node_id: str) -> dict[str, Any]:
+        if node_id == "chapter_01_complete":
+            return {
+                "id": node_id,
+                "type": "chapter_complete",
+                "title": "Chapter 1 Complete",
+                "text": [
+                    "Ashenfall survived the night.",
+                    "One bell is silent. Twenty-seven people are still missing.",
+                    "The road beyond the city is waiting.",
+                    "Chapter 2 has not been installed yet, so your progress is safely parked here.",
+                ],
+            }
         nodes = self._nodes(self.state.chapter)
         if node_id not in nodes:
             raise StoryError(f"Story node not found: {node_id}")
@@ -109,8 +123,9 @@ class StoryEngine:
         for entry in values.get("add", []):
             item_id = str(entry["id"])
             quantity = max(0, int(entry.get("quantity", 1)))
+            item = DEFAULT_ITEMS.get(item_id)
             for _ in range(quantity):
-                if item_id not in inventory or item_id == "health-potion":
+                if item is None or item.stackable or item_id not in inventory:
                     inventory.append(item_id)
         for entry in values.get("remove", []):
             item_id = str(entry["id"])
@@ -140,8 +155,7 @@ class StoryEngine:
         available: list[str] = []
         for action in actions:
             if node.get("requires_background", {}).get(action):
-                required = str(node["requires_background"][action])
-                if self.state.player.background_id != required:
+                if self.state.player.background_id != str(node["requires_background"][action]):
                     continue
             if node.get("requires_action", {}).get(action) and not can_use_action(self.state, action):
                 continue
@@ -149,6 +163,47 @@ class StoryEngine:
         available.append("continue")
         selected = menu(node.get("title", "Explore"), [a.replace("_", " ").title() for a in available])
         return available[selected]
+
+    def _select_save(self) -> int | None:
+        if not self.manager:
+            return None
+        infos = self.manager.list_slots()
+        options = [
+            f"Save{info.slot} — {info.player_name or 'Unknown'}, Lv.{info.level or '?'}" if info.exists
+            else f"Save{info.slot} — EMPTY"
+            for info in infos
+        ]
+        options.append("Cancel")
+        selected = menu("LOAD SAVE", options)
+        if selected == len(infos):
+            return None
+        slot = infos[selected].slot
+        if not infos[selected].exists:
+            return None
+        return slot
+
+    def _death_flow(self, *, fallen_state) -> str:
+        while True:
+            clear()
+            title()
+            print("\n       YOU DIED\n")
+            print("      Credit for skull on Instagram")
+            print("              @vagonparovoz\n")
+            selected = menu("DEATH", ["Retry Checkpoint", "Load Save", "Main Menu"])
+            if selected == 0:
+                if not self.manager or not self.manager.exists("autosave"):
+                    clear(); title(); print("\nNo checkpoint is available yet.\n"); pause(); return "main_menu"
+                self.state = self.manager.load("autosave")
+                self.save_slot = self.save_slot if self.save_slot in (1, 2, 3) else 1
+                return "retry"
+            if selected == 1:
+                slot = self._select_save()
+                if slot is None:
+                    continue
+                self.state = self.manager.load(slot)
+                self.save_slot = slot
+                return "retry"
+            return "main_menu"
 
     def _run_combat(self, combat: dict[str, Any]) -> str | None:
         enemy_hp = int(combat.get("hp", 50))
@@ -168,6 +223,8 @@ class StoryEngine:
             if action == 0:
                 damage = max(1, attack - enemy_defense)
                 enemy_hp -= damage
+                if enemy_hp <= 0:
+                    record_action(self.state, "kill")
                 print(f"\nYou deal {damage} damage.")
             elif action == 1:
                 defending = True
@@ -206,8 +263,13 @@ class StoryEngine:
             if player.hp <= 0:
                 player.hp = 0
                 self.state.history.append("combat:defeat")
+                if self.manager:
+                    self.manager.autosave(self.state)
                 pause()
-                return combat.get("on_loss")
+                death_result = self._death_flow(fallen_state=self.state)
+                if death_result == "retry":
+                    return "__retry__"
+                return None
             pause()
         return combat.get("on_win")
 
@@ -217,15 +279,15 @@ class StoryEngine:
         if next_node == "chapter_02":
             self.state.world_flags["chapter_01_complete"] = True
             evaluate(self.state)
-            self.state.chapter = 2
-            self.state.current_story_node = "chapter_02"
+            self.state.current_story_node = "chapter_01_complete"
+            if self.manager:
+                self.manager.save(self.save_slot, self.state)
+                self.manager.autosave(self.state)
             clear(); title()
             print("\nCHAPTER 1 COMPLETE\n")
             print("Ashenfall survived the night.")
             print("One bell is silent. Twenty-seven people are still missing.")
-            print("\nYour Chapter 1 checkpoint is safe.")
-            if self.manager:
-                self.manager.save(1, self.state)
+            print("\nYour Chapter 1 progress is safely saved.")
             pause()
             return False
         if next_node not in self._nodes(self.state.chapter):
@@ -237,19 +299,24 @@ class StoryEngine:
         while True:
             node = self._node(self.state.current_story_node)
             self._show_node(node)
+            if node.get("type") == "chapter_complete":
+                return
             if node.get("type") == "dungeon_entry":
                 self.state.world_flags["entered_below_bell"] = True
             self._apply_effects(node.get("effects"))
             if node.get("checkpoint") or node.get("type") == "checkpoint":
                 self.state.checkpoint_node = node["id"]
                 if self.manager:
-                    self.manager.save(1, self.state)
+                    self.manager.save(self.save_slot, self.state)
+                    self.manager.autosave(self.state)
                 evaluate(self.state)
                 print("Checkpoint saved.")
                 pause()
             combat = node.get("combat")
             if combat:
                 next_node = self._run_combat(combat)
+                if next_node == "__retry__":
+                    continue
                 if not self._transition(next_node):
                     return
                 continue
@@ -275,5 +342,5 @@ class StoryEngine:
                 return
 
 
-def run_new_game(manager: SaveManager, state) -> None:
-    StoryEngine(state, manager).run()
+def run_new_game(manager: SaveManager, state, *, save_slot: int = 1) -> None:
+    StoryEngine(state, manager, save_slot=save_slot).run()
