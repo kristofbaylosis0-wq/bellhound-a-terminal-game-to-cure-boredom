@@ -51,6 +51,10 @@ class Player:
         return max(100, 100 + (self.level - 1) * 35 + (self.level - 1) ** 2 * 10)
 
     def add_xp(self, amount: int) -> int:
+        """Add XP and return the number of levels gained.
+        
+        Each level awards 3 stat points and 1 skill point.
+        """
         if amount < 0:
             raise ValueError("XP amount cannot be negative")
         self.xp += amount
