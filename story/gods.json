@@ -1,0 +1,187 @@
+{
+  "title": "The Twelve Bells",
+  "version": 1,
+  "note": "The player's true god is never selected directly. Divine affinity is inferred from stats, actions, choices, quests, and repeated behavior.",
+  "gods": [
+    {
+      "bell": 1,
+      "id": "aureon",
+      "name": "Aureon",
+      "title": "God of Strength",
+      "domain": "strength",
+      "awakening": {
+        "primary_stats": ["strength", "endurance"],
+        "behaviors": ["solve problems through force", "protect others physically", "overcome powerful enemies"],
+        "negative": ["reckless destruction", "unnecessary cruelty"]
+      },
+      "bell_event": "bell_01_reawakening",
+      "divine_gifts": ["Colossal Might", "Unbreakable", "Worldbreaker"],
+      "theme": "Power is responsibility, not permission."
+    },
+    {
+      "bell": 2,
+      "id": "nyxara",
+      "name": "Nyxara",
+      "title": "Goddess of Shadows",
+      "domain": "stealth",
+      "awakening": {
+        "primary_stats": ["agility", "luck"],
+        "behaviors": ["avoid detection", "infiltrate restricted places", "solve problems unseen", "protect secrets"],
+        "negative": ["betrayal for amusement", "random murder"]
+      },
+      "bell_event": "bell_02_reawakening",
+      "divine_gifts": ["Veilwalk", "Shadowstep", "Unseen World"],
+      "theme": "What remains unseen can still change everything."
+    },
+    {
+      "bell": 3,
+      "id": "veyra",
+      "name": "Veyra",
+      "title": "Goddess of Knowledge",
+      "domain": "knowledge",
+      "awakening": {
+        "primary_stats": ["intelligence", "willpower"],
+        "behaviors": ["investigate mysteries", "recover lost lore", "solve puzzles", "seek truth over convenience"],
+        "negative": ["destroying knowledge", "lying to conceal discovered truth"]
+      },
+      "bell_event": "bell_03_reawakening",
+      "divine_gifts": ["Perfect Recall", "Read the Forgotten", "Omniscient Fragment"],
+      "theme": "Truth can save a world or break it."
+    },
+    {
+      "bell": 4,
+      "id": "kaelos",
+      "name": "Kaelos",
+      "title": "God of War",
+      "domain": "war",
+      "awakening": {
+        "primary_stats": ["strength", "agility"],
+        "behaviors": ["choose combat when possible", "lead allies in battle", "win dangerous fights", "seek worthy opponents"],
+        "negative": ["murder for sport", "hurting innocents"]
+      },
+      "bell_event": "bell_04_reawakening",
+      "divine_gifts": ["Battle Trance", "Warlord's Command", "Last Stand"],
+      "theme": "War is not violence. War is what you choose to defend."
+    },
+    {
+      "bell": 5,
+      "id": "elyra",
+      "name": "Elyra",
+      "title": "Goddess of Life",
+      "domain": "life",
+      "awakening": {
+        "primary_stats": ["willpower", "endurance"],
+        "behaviors": ["heal others", "save people who can be saved", "protect the weak", "restore damaged places"],
+        "negative": ["needless killing", "using healing only for selfish gain"]
+      },
+      "bell_event": "bell_05_reawakening",
+      "divine_gifts": ["Greater Restoration", "Bloom of Life", "Return the Dead"],
+      "theme": "Life is not weakness. It is the refusal to surrender."
+    },
+    {
+      "bell": 6,
+      "id": "mora",
+      "name": "Mora",
+      "title": "Goddess of Death",
+      "domain": "death",
+      "awakening": {
+        "primary_stats": ["willpower", "intelligence"],
+        "behaviors": ["face death without fear", "honor the dead", "end suffering when necessary", "seek the boundary between life and death"],
+        "negative": ["desecrating the dead", "mass killing for pleasure"]
+      },
+      "bell_event": "bell_06_reawakening",
+      "divine_gifts": ["Gravewalk", "Merciful End", "Keeper of the Veil"],
+      "theme": "Death is a boundary, not an enemy."
+    },
+    {
+      "bell": 7,
+      "id": "aeris",
+      "name": "Aeris",
+      "title": "Goddess of Storms",
+      "domain": "storms",
+      "awakening": {
+        "primary_stats": ["agility", "willpower"],
+        "behaviors": ["seek dangerous environments", "use elemental power", "choose freedom over safety", "survive storms and disasters"],
+        "negative": ["destroying towns without cause"]
+      },
+      "bell_event": "bell_07_reawakening",
+      "divine_gifts": ["Stormcall", "Lightning Step", "Eye of the Tempest"],
+      "theme": "A storm cannot be owned."
+    },
+    {
+      "bell": 8,
+      "id": "thalor",
+      "name": "Thalor",
+      "title": "God of Seas",
+      "domain": "sea",
+      "awakening": {
+        "primary_stats": ["endurance", "luck"],
+        "behaviors": ["explore dangerous waters", "help sailors", "recover submerged ruins", "choose discovery over comfort"],
+        "negative": ["betraying crews", "hoarding rescued treasure"]
+      },
+      "bell_event": "bell_08_reawakening",
+      "divine_gifts": ["Tidecall", "Breath of the Deep", "Leviathan's Favor"],
+      "theme": "The horizon is an invitation."
+    },
+    {
+      "bell": 9,
+      "id": "seris",
+      "name": "Seris",
+      "title": "Goddess of Fate",
+      "domain": "fate",
+      "awakening": {
+        "primary_stats": ["luck", "intelligence"],
+        "behaviors": ["manipulate outcomes", "study prophecy", "take calculated risks", "change events through precise choices"],
+        "negative": ["blindly surrendering to prophecy"]
+      },
+      "bell_event": "bell_09_reawakening",
+      "divine_gifts": ["Threadstep", "Second Chance", "Rewrite the Moment"],
+      "theme": "Fate is a pattern. Choice is the hand that breaks it."
+    },
+    {
+      "bell": 10,
+      "id": "vael",
+      "name": "Vael",
+      "title": "God of Freedom",
+      "domain": "freedom",
+      "awakening": {
+        "primary_stats": ["charisma", "agility"],
+        "behaviors": ["reject unjust authority", "free prisoners", "help oppressed people", "break rules for a greater good"],
+        "negative": ["breaking promises for convenience", "causing chaos without purpose"]
+      },
+      "bell_event": "bell_10_reawakening",
+      "divine_gifts": ["Chainbreaker", "Unbound", "No Master's Command"],
+      "theme": "Freedom without responsibility is only another cage."
+    },
+    {
+      "bell": 11,
+      "id": "ilyon",
+      "name": "Ilyon",
+      "title": "God of Creation",
+      "domain": "creation",
+      "awakening": {
+        "primary_stats": ["intelligence", "charisma"],
+        "behaviors": ["craft and build", "restore settlements", "create useful things", "solve problems without destroying"],
+        "negative": ["creating weapons only to increase suffering"]
+      },
+      "bell_event": "bell_11_reawakening",
+      "divine_gifts": ["Forge of Dawn", "Imprint", "Genesis Hand"],
+      "theme": "To create is to accept responsibility for what follows."
+    },
+    {
+      "bell": 12,
+      "id": "the_forgotten",
+      "name": "The Forgotten",
+      "title": "The God That Must Not Return",
+      "domain": "forgotten",
+      "awakening": {
+        "primary_stats": ["none"],
+        "behaviors": ["repeated needless killing", "repeated cruelty", "destroying meaningful bonds", "choosing power over people again and again"],
+        "negative": ["mercy", "restoration", "genuine self-sacrifice"]
+      },
+      "bell_event": "bell_12_reawakening",
+      "divine_gifts": ["Unperson", "Erase the Bond", "The Last Silence"],
+      "theme": "The Forgotten is not another god. It is what remains when the others are stripped away."
+    }
+  ]
+}
