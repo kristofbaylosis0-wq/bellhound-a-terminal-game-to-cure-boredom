@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-SAVE_VERSION = 3
+SAVE_VERSION = 4
 START_LOCATION = "ashen-capital-gate"
 DIVINE_DOMAINS = (
     "strength", "shadows", "knowledge", "war", "life", "death",
@@ -107,6 +107,7 @@ class GameState:
     divine_affinity: dict[str, float] = field(default_factory=default_divine_affinity)
     discovered_lore: list[str] = field(default_factory=list)
     history: list[str] = field(default_factory=list)
+    achievements: list[str] = field(default_factory=list)
     random_seed: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -124,13 +125,14 @@ class GameState:
             "divine_affinity": self.divine_affinity,
             "discovered_lore": self.discovered_lore,
             "history": self.history,
+            "achievements": self.achievements,
             "random_seed": self.random_seed,
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "GameState":
         version = int(data.get("save_version", 0))
-        if version not in {1, 2, SAVE_VERSION}:
+        if version not in {1, 2, 3, SAVE_VERSION}:
             raise ValueError(f"Unsupported save version: {version}")
         divine = default_divine_affinity()
         for key, value in data.get("divine_affinity", {}).items():
@@ -149,5 +151,6 @@ class GameState:
             divine_affinity=divine,
             discovered_lore=list(data.get("discovered_lore", [])),
             history=list(data.get("history", [])),
+            achievements=list(data.get("achievements", [])),
             random_seed=data.get("random_seed"),
         )
