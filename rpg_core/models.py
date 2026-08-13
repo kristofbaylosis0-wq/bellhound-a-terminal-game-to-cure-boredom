@@ -9,17 +9,20 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-SAVE_VERSION = 2
-BASE_XP_TO_LEVEL = 100
+SAVE_VERSION = 3
 START_LOCATION = "ashen-capital-gate"
 DIVINE_DOMAINS = (
     "strength", "shadows", "knowledge", "war", "life", "death",
     "storms", "sea", "fate", "freedom", "creation", "forgotten",
 )
+DEFAULT_STATS = {
+    "strength": 5, "agility": 5, "endurance": 5,
+    "intelligence": 5, "willpower": 5, "charisma": 5, "luck": 5,
+}
 
 
-def default_divine_affinity() -> dict[str, int]:
-    return {domain: 0 for domain in DIVINE_DOMAINS}
+def default_divine_affinity() -> dict[str, float]:
+    return {domain: 0.0 for domain in DIVINE_DOMAINS}
 
 
 @dataclass
@@ -32,18 +35,20 @@ class Player:
     stat_points: int = 0
     skill_points: int = 0
     gold: int = 25
-    stats: dict[str, int] = field(default_factory=lambda: {
-        "strength": 5, "agility": 5, "endurance": 5,
-        "intelligence": 5, "willpower": 5, "charisma": 5, "luck": 5,
-    })
+    stats: dict[str, int] = field(default_factory=lambda: dict(DEFAULT_STATS))
     skills: dict[str, int] = field(default_factory=dict)
     inventory: list[str] = field(default_factory=list)
     equipment: dict[str, str | None] = field(default_factory=lambda: {
         "weapon": None, "armor": None, "accessory": None,
     })
+    background_id: str = ""
+    profession: str = "wanderer"
+    divine_prediction: str = "undetermined"
+    action_history: list[str] = field(default_factory=list)
+    discovered_abilities: list[str] = field(default_factory=list)
 
     def xp_to_next_level(self) -> int:
-        return BASE_XP_TO_LEVEL * self.level
+        return max(100, 100 + (self.level - 1) * 35 + (self.level - 1) ** 2 * 10)
 
     def add_xp(self, amount: int) -> int:
         if amount < 0:
@@ -53,7 +58,7 @@ class Player:
         while self.xp >= self.xp_to_next_level():
             self.xp -= self.xp_to_next_level()
             self.level += 1
-            self.stat_points += 2
+            self.stat_points += 3
             self.skill_points += 1
             self.max_hp += 10
             self.hp = self.max_hp
@@ -63,6 +68,7 @@ class Player:
     def spend_stat_point(self, stat: str) -> None:
         if self.stat_points <= 0:
             raise ValueError("No stat points available")
+        stat = stat.strip().lower()
         if stat not in self.stats:
             raise ValueError(f"Unknown stat: {stat}")
         self.stats[stat] += 1
@@ -75,7 +81,15 @@ class Player:
     def from_dict(cls, data: dict[str, Any]) -> "Player":
         normalized = dict(data)
         normalized.setdefault("gold", 25)
+        normalized.setdefault("stats", dict(DEFAULT_STATS))
+        normalized.setdefault("skills", {})
         normalized.setdefault("inventory", [])
+        normalized.setdefault("equipment", {"weapon": None, "armor": None, "accessory": None})
+        normalized.setdefault("background_id", "")
+        normalized.setdefault("profession", "wanderer")
+        normalized.setdefault("divine_prediction", "undetermined")
+        normalized.setdefault("action_history", [])
+        normalized.setdefault("discovered_abilities", [])
         return cls(**normalized)
 
 
@@ -90,7 +104,7 @@ class GameState:
     quest_states: dict[str, str] = field(default_factory=dict)
     relationships: dict[str, int] = field(default_factory=dict)
     faction_reputation: dict[str, int] = field(default_factory=dict)
-    divine_affinity: dict[str, int] = field(default_factory=default_divine_affinity)
+    divine_affinity: dict[str, float] = field(default_factory=default_divine_affinity)
     discovered_lore: list[str] = field(default_factory=list)
     history: list[str] = field(default_factory=list)
     random_seed: int | None = None
@@ -116,12 +130,12 @@ class GameState:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "GameState":
         version = int(data.get("save_version", 0))
-        if version not in {1, SAVE_VERSION}:
+        if version not in {1, 2, SAVE_VERSION}:
             raise ValueError(f"Unsupported save version: {version}")
         divine = default_divine_affinity()
         for key, value in data.get("divine_affinity", {}).items():
             if key in divine:
-                divine[key] = int(value)
+                divine[key] = float(value)
         return cls(
             player=Player.from_dict(data["player"]),
             location=data.get("location", START_LOCATION),
