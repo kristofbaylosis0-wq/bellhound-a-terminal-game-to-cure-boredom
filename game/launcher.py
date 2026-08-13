@@ -83,7 +83,6 @@ def load_saves(manager: SaveManager) -> None:
         print(f"\nLoaded Save{slot}.\n")
         print(f"Welcome back, {state.player.name}.")
         print(f"Level {state.player.level} | HP {state.player.hp}/{state.player.max_hp}")
-        print(f"Location: {state.location}")
         print(f"Story: Chapter {state.chapter} — {state.current_story_node}")
         pause()
         _start_story(manager, state)
