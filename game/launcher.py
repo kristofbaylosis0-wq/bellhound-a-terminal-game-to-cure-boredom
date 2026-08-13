@@ -19,16 +19,17 @@ def _choose_background() -> str:
     return ids[selected]
 
 
-def _start_story(manager: SaveManager, state) -> None:
+def _start_story(manager: SaveManager, state, *, save_slot: int) -> None:
     try:
-        StoryEngine(state, manager).run()
+        StoryEngine(state, manager, save_slot=save_slot).run()
     except Exception as exc:
         clear()
         title()
         print("\nThe story engine encountered an error.\n")
         print(f"{type(exc).__name__}: {exc}")
-        print("\nYour current state has been kept in Save1.")
-        manager.save(1, state)
+        print(f"\nYour current state has been kept in Save{save_slot}.")
+        manager.save(save_slot, state)
+        manager.autosave(state)
         pause()
 
 
@@ -41,6 +42,7 @@ def new_game(manager: SaveManager) -> None:
     background_id = _choose_background()
     state = create_new_game(name, background_id=background_id)
     manager.save(1, state)
+    manager.autosave(state)
 
     clear()
     title()
@@ -49,7 +51,7 @@ def new_game(manager: SaveManager) -> None:
     print("Your choices—not your background—will shape who you become.")
     print("\nYour journey begins...\n")
     pause()
-    _start_story(manager, state)
+    _start_story(manager, state, save_slot=1)
 
 
 def load_saves(manager: SaveManager) -> None:
@@ -85,7 +87,7 @@ def load_saves(manager: SaveManager) -> None:
         print(f"Level {state.player.level} | HP {state.player.hp}/{state.player.max_hp}")
         print(f"Story: Chapter {state.chapter} — {state.current_story_node}")
         pause()
-        _start_story(manager, state)
+        _start_story(manager, state, save_slot=slot)
         return
 
 
