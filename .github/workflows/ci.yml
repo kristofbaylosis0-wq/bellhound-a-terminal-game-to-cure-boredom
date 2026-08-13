@@ -9,10 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js 24 LTS
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          check-latest: true
+
+      - name: Verify Node.js runtime
+        run: |
+          node --version
+          npm --version
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
           cache: pip
@@ -21,20 +32,13 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f pyproject.toml ]; then pip install -e .; fi
+          python -m pip install -e '.[dev]'
 
       - name: Compile Python sources
-        run: python -m compileall -q .
+        run: python -m compileall -q game rpg_ai rpg_core rpg_world story
 
       - name: Run tests
-        shell: bash
-        run: |
-          if [ -d tests ]; then
-            python -m pytest -q
-          else
-            echo 'No tests directory found; compile check passed.'
-          fi
+        run: python -m pytest -q
 
       - name: Validate JSON story/data files
         shell: bash
@@ -43,8 +47,9 @@ jobs:
           import json
           from pathlib import Path
 
-          files = list(Path('.').rglob('*.json'))
-          ignored = {'.git', '.venv', 'venv', 'node_modules'}
+          ignored = {'.git', '.venv', 'venv', 'node_modules', '__pycache__'}
+          roots = [Path('story'), Path('rpg_world'), Path('game/assets')]
+          files = [p for root in roots if root.exists() for p in root.rglob('*.json')]
           checked = 0
           for path in files:
               if any(part in ignored for part in path.parts):
@@ -52,8 +57,8 @@ jobs:
               with path.open(encoding='utf-8') as f:
                   json.load(f)
               checked += 1
-          print(f'Validated {checked} JSON file(s).')
+          print(f'Validated {checked} JSON story/data file(s).')
           PY
 
-      - name: Smoke test preview import
-        run: python -c "import game.preview; print('Preview import OK')"
+      - name: Smoke test launcher imports
+        run: python -c "import game.__main__; import game.launcher; import story.engine; print('Launcher/story imports OK')"
