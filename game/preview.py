@@ -106,6 +106,38 @@ def _show_facilities() -> None:
     pause()
 
 
+def _show_systems() -> None:
+    while True:
+        selected = menu("PREVIEW SYSTEMS", [
+            "Player / Character Sheet",
+            "Inventory UI",
+            "Progression + Divine Resonance",
+            "Backgrounds / Professions",
+            "Facilities",
+            "AI Provider Setup",
+            "Save Slots",
+            "World / Area Browser",
+            "Back",
+        ])
+        if selected == 0: _show_character()
+        elif selected == 1: _show_inventory()
+        elif selected == 2: _show_progression()
+        elif selected == 3: _show_backgrounds()
+        elif selected == 4: _show_facilities()
+        elif selected == 5:
+            from .ai_setup import provider_setup
+            provider_setup(force=True)
+        elif selected == 6:
+            _show_placeholder("SAVE SLOTS", ["Save1 — Preview Hero, Lv.1", "Save2 — EMPTY", "Save3 — EMPTY"])
+        elif selected == 7:
+            _show_placeholder("WORLD / AREA BROWSER", [
+                "The Ashen Capital", "The Greywater Coast", "The Verdant March", "The Hollow Under",
+                "The Sunken Archive", "The Ironbound Frontier", "The Blackglass Desert", "The Skygrave",
+            ])
+        else:
+            return
+
+
 def _show_placeholder(name: str, lines: list[str]) -> None:
     clear(); title(); print(f"\n{name}\n")
     for line in lines: print(line)
@@ -115,26 +147,16 @@ def _show_placeholder(name: str, lines: list[str]) -> None:
 def preview() -> None:
     while True:
         selected = menu("DEVELOPER PREVIEW", [
-            "Main Menu", "Death Screen", "Player / Character Sheet", "Inventory UI",
-            "Progression + Divine Resonance", "Backgrounds / Professions", "Facilities",
-            "AI Provider Setup", "Save Slots", "World / Area Browser", "Exit Preview",
+            "Main Menu",
+            "Death Screen",
+            "Preview Systems",
+            "Exit",
         ])
-        if selected == 0: _show_main_menu()
-        elif selected == 1: _show_skull()
-        elif selected == 2: _show_character()
-        elif selected == 3: _show_inventory()
-        elif selected == 4: _show_progression()
-        elif selected == 5: _show_backgrounds()
-        elif selected == 6: _show_facilities()
-        elif selected == 7:
-            from .ai_setup import provider_setup
-            provider_setup(force=True)
-        elif selected == 8:
-            _show_placeholder("SAVE SLOTS", ["Save1 — Preview Hero, Lv.1", "Save2 — EMPTY", "Save3 — EMPTY"])
-        elif selected == 9:
-            _show_placeholder("WORLD / AREA BROWSER", [
-                "The Ashen Capital", "The Greywater Coast", "The Verdant March", "The Hollow Under",
-                "The Sunken Archive", "The Ironbound Frontier", "The Blackglass Desert", "The Skygrave",
-            ])
+        if selected == 0:
+            _show_main_menu()
+        elif selected == 1:
+            _show_skull()
+        elif selected == 2:
+            _show_systems()
         else:
             return
