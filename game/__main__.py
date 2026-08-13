@@ -6,10 +6,9 @@ import argparse
 
 from rpg_core.save_manager import SaveManager
 
-from .ai_setup import provider_setup
-from .launcher import launcher, load_saves, new_game
-from .preview import preview
+from .launcher import launcher, new_game, preview
 from .ui import clear, pause, title
+from story.engine import StoryEngine
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -25,6 +24,19 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _start_saved_story(manager: SaveManager, slot: int) -> int:
+    state = manager.load(slot)
+    clear()
+    title()
+    print(f"\nLoaded Save{slot}.\n")
+    print(f"Welcome back, {state.player.name}.")
+    print(f"Level {state.player.level} | HP {state.player.hp}/{state.player.max_hp}")
+    print(f"Story: Chapter {state.chapter} — {state.current_story_node}")
+    pause()
+    StoryEngine(state, manager, save_slot=slot).run()
+    return 0
+
+
 def load_save(manager: SaveManager, name: str) -> int:
     normalized = name.lower().replace(".json", "")
     if normalized.startswith("save") and normalized[4:].isdigit():
@@ -37,15 +49,16 @@ def load_save(manager: SaveManager, name: str) -> int:
         print(f"Save '{name}' was not found.")
         return 1
 
-    state = manager.load(slot)
-    clear()
-    title()
-    print(f"\nLoaded Save{slot}.\n")
-    print(f"Welcome back, {state.player.name}.")
-    print(f"Level {state.player.level} | HP {state.player.hp}/{state.player.max_hp}")
-    print(f"Location: {state.location}")
-    pause()
-    return 0
+    try:
+        return _start_saved_story(manager, slot)
+    except Exception as exc:
+        clear()
+        title()
+        print("\nUnable to resume that save.\n")
+        print(f"{type(exc).__name__}: {exc}")
+        print(f"\nSave{slot} was not deleted or modified.")
+        pause()
+        return 1
 
 
 def main() -> int:
@@ -53,15 +66,11 @@ def main() -> int:
     target = [part.lower() for part in args.target]
     manager = SaveManager()
 
-    # Preview is intentionally offline: it should work even before an AI
-    # provider has been configured and must never invoke story generation.
+    # Preview and the handcrafted campaign are intentionally usable without
+    # an AI provider. AI is an optional gameplay layer, not a boot dependency.
     if target == ["preview"]:
         preview()
         return 0
-
-    # Configure AI before the game launcher on first run. Direct commands also
-    # get the same setup so every normal entry point has a valid AI configuration.
-    provider_setup()
 
     if not target or target == ["game"]:
         launcher(manager)
