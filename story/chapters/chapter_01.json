@@ -1,0 +1,260 @@
+{
+  "chapter": 1,
+  "id": "ashfall",
+  "title": "The Seventh Silence",
+  "setting": "Ashenfall",
+  "mode": "handcrafted",
+  "ai_required": false,
+  "summary": "The player arrives home on the night the city's bell fails to complete its twelve strikes. Twenty-seven people vanish, including a person the player met earlier that day. The investigation leads below the bell tower and reveals the first clue that the bells are older, stranger, and more personal than the city believes.",
+  "beats": [
+    {
+      "id": "ch1_arrival",
+      "type": "scene",
+      "title": "Ashenfall at Dusk",
+      "text": [
+        "Ashenfall is an old city built around a bell tower older than the kingdom that surrounds it.",
+        "By sunset, market stalls are closing and the western gate is filling with travelers trying to reach shelter before midnight.",
+        "You arrive with no prophecy, no title, and no idea that tonight will become the most important night of your life."
+      ],
+      "actions": ["look_around", "visit_market", "visit_tavern", "go_home"]
+    },
+    {
+      "id": "ch1_market",
+      "type": "interaction",
+      "title": "The Evening Market",
+      "text": [
+        "The market is almost closed. A bellkeeper's apprentice named Mira Vale is arguing with a spice merchant over a sealed crate.",
+        "She notices you watching and asks whether you have seen anyone carrying a black iron key."
+      ],
+      "choices": [
+        {
+          "id": "help_mira",
+          "text": "Help Mira look for the key.",
+          "effects": {"relationships": {"mira": 2}, "flags": {"mira_trust_early": true}},
+          "next": "ch1_mira_key"
+        },
+        {
+          "id": "ignore_mira",
+          "text": "Tell her you have not seen it and leave.",
+          "effects": {"relationships": {"mira": -1}},
+          "next": "ch1_before_midnight"
+        },
+        {
+          "id": "steal_crate",
+          "text": "Try to steal the crate while she is distracted.",
+          "effects": {"world_flags": {"market_theft": true}, "divine_affinity": {"shadows": 2}},
+          "next": "ch1_steal_crate"
+        }
+      ]
+    },
+    {
+      "id": "ch1_mira_key",
+      "type": "scene",
+      "title": "The Black Iron Key",
+      "text": [
+        "You find the key beneath the merchant's counter. It is cold enough to hurt your fingers.",
+        "Mira stares at the symbol stamped into its head: a bell surrounded by twelve small circles.",
+        "She quietly admits she has seen the same symbol in forbidden records beneath the bell tower."
+      ],
+      "effects": {"relationships": {"mira": 1}, "flags": {"knows_bell_symbol": true}, "items": {"add": [{"id": "black_iron_key", "quantity": 1}]}},
+      "next": "ch1_before_midnight"
+    },
+    {
+      "id": "ch1_steal_crate",
+      "type": "interaction",
+      "title": "A Bad Idea",
+      "text": [
+        "The lock gives more easily than expected. Inside the crate is not spice, but a bundle of old bellkeeper records.",
+        "You can return them, hide one page, or take the entire bundle."
+      ],
+      "choices": [
+        {"id": "return_records", "text": "Return the records.", "effects": {"divine_affinity": {"freedom": 1}}, "next": "ch1_before_midnight"},
+        {"id": "hide_page", "text": "Hide one page and return the rest.", "effects": {"divine_affinity": {"shadows": 2}, "flags": {"stolen_bell_page": true}}, "next": "ch1_before_midnight"},
+        {"id": "take_all", "text": "Take everything.", "effects": {"divine_affinity": {"shadows": 1}, "world_flags": {"bell_records_stolen": true}}, "next": "ch1_before_midnight"}
+      ]
+    },
+    {
+      "id": "ch1_before_midnight",
+      "type": "scene",
+      "title": "Eleven Minutes to Midnight",
+      "text": [
+        "The city is unusually quiet.",
+        "Shopkeepers pull shutters closed. Guards gather beneath the bell tower. Dogs bark at empty streets.",
+        "Someone has chalked the words THE SEVENTH MUST NOT FAIL across the tower gate."
+      ],
+      "actions": ["inspect_chalk", "talk_to_guard", "find_mira", "wait_for_midnight"]
+    },
+    {
+      "id": "ch1_midnight",
+      "type": "major_event",
+      "title": "The Seventh Silence",
+      "text": [
+        "Midnight arrives.",
+        "The great bell strikes once.",
+        "Twice.",
+        "Three times.",
+        "Four.",
+        "Five.",
+        "Six.",
+        "Seven.",
+        "Then nothing."
+      ],
+      "effects": {"world_flags": {"bell_07_silent": true, "first_bell_failure": true}, "chapter": 1},
+      "next": "ch1_memory_slip"
+    },
+    {
+      "id": "ch1_memory_slip",
+      "type": "major_event",
+      "title": "The Missing Names",
+      "text": [
+        "For three heartbeats, nobody in Ashenfall remembers their own name.",
+        "Then the memory returns.",
+        "Almost.",
+        "Twenty-seven people are gone. Doors remain locked. Beds remain warm. Cups remain on tables.",
+        "One of the missing is someone you spoke to earlier tonight."
+      ],
+      "next": "ch1_investigation"
+    },
+    {
+      "id": "ch1_investigation",
+      "type": "quest_start",
+      "title": "The Twenty-Seven",
+      "quest": "q_ch1_missing",
+      "text": [
+        "The city authorities call it a mass kidnapping.",
+        "Mira calls it a lie.",
+        "She asks you to help search the bell tower before the authorities seal it."
+      ],
+      "choices": [
+        {
+          "id": "investigate_mira",
+          "text": "Help Mira investigate the tower.",
+          "effects": {"quest_states": {"q_ch1_missing": "active"}, "relationships": {"mira": 3}},
+          "next": "ch1_tower"
+        },
+        {
+          "id": "follow_authorities",
+          "text": "Follow the official investigation instead.",
+          "effects": {"quest_states": {"q_ch1_missing": "active"}, "faction_reputation": {"crown": 2}},
+          "next": "ch1_guard_route"
+        },
+        {
+          "id": "search_alone",
+          "text": "Investigate alone.",
+          "effects": {"quest_states": {"q_ch1_missing": "active"}, "divine_affinity": {"knowledge": 1}},
+          "next": "ch1_lower_stairs"
+        }
+      ]
+    },
+    {
+      "id": "ch1_tower",
+      "type": "dungeon_entry",
+      "title": "Beneath the Bell",
+      "text": [
+        "The tower interior smells of cold metal and wet stone.",
+        "Mira unlocks a door that should not exist.",
+        "Beyond it, a spiral staircase descends into darkness."
+      ],
+      "actions": ["descend", "inspect_inscription", "question_mira", "leave"]
+    },
+    {
+      "id": "ch1_guard_route",
+      "type": "investigation",
+      "title": "The Official Story",
+      "text": [
+        "The guards show you the rooms of three missing people.",
+        "All three have one impossible detail: every clock stopped at exactly 00:07."
+      ],
+      "effects": {"divine_affinity": {"knowledge": 1}, "world_flags": {"clock_0007": true}},
+      "next": "ch1_lower_stairs"
+    },
+    {
+      "id": "ch1_lower_stairs",
+      "type": "lore",
+      "title": "The Inscription",
+      "text": [
+        "At the bottom of the stairs you find an inscription carved into black stone.",
+        "THE BELLS DO NOT KEEP THE DARKNESS OUT.",
+        "THE BELLS KEEP THE MEMORY OF THE DARKNESS IN."
+      ],
+      "effects": {"discovered_lore": ["bells_bind_memory"]},
+      "next": "ch1_first_echo"
+    },
+    {
+      "id": "ch1_first_echo",
+      "type": "revelation",
+      "title": "The Echo",
+      "text": [
+        "You touch the inscription.",
+        "For an instant, you are standing somewhere else.",
+        "There are twelve colossal bells.",
+        "Eleven burn with light.",
+        "The fifth is bleeding golden fire.",
+        "A woman is screaming your name.",
+        "You do not know her.",
+        "You do not know the name she screams.",
+        "But part of you remembers both."
+      ],
+      "effects": {"world_flags": {"first_divine_echo": true}, "divine_affinity": {"life": 1, "knowledge": 1}},
+      "next": "ch1_boss_choice"
+    },
+    {
+      "id": "ch1_boss_choice",
+      "type": "choice",
+      "title": "The Hollow Bellkeeper",
+      "text": [
+        "A figure emerges from the dark wearing the remains of a Bellkeeper's uniform.",
+        "It asks you one question:",
+        "'When the bell rings again, whose memory should survive?'"
+      ],
+      "choices": [
+        {
+          "id": "save_people",
+          "text": "The people who were taken.",
+          "effects": {"divine_affinity": {"life": 2}, "world_flags": {"prioritized_missing_people": true}},
+          "next": "ch1_checkpoint"
+        },
+        {
+          "id": "seek_truth",
+          "text": "Whoever was telling the truth.",
+          "effects": {"divine_affinity": {"knowledge": 2}},
+          "next": "ch1_checkpoint"
+        },
+        {
+          "id": "destroy_bell",
+          "text": "Break the bell and end the cycle.",
+          "effects": {"divine_affinity": {"war": 1, "freedom": 1}, "world_flags": {"bell_destruction_intent": true}},
+          "next": "ch1_checkpoint"
+        },
+        {
+          "id": "kill_figure",
+          "text": "Kill it before it can speak again.",
+          "effects": {"divine_affinity": {"death": 1, "forgotten": 1}},
+          "next": "ch1_checkpoint"
+        }
+      ]
+    },
+    {
+      "id": "ch1_checkpoint",
+      "type": "checkpoint",
+      "title": "The First Safe Bell",
+      "text": [
+        "You escape the lower tower before dawn.",
+        "Ashenfall is still standing, but something has changed.",
+        "The broken seventh bell is silent.",
+        "For the first time in recorded history, the city has entered a day without all twelve bells guarding it."
+      ],
+      "effects": {"checkpoint": true, "world_flags": {"chapter_01_complete": true}},
+      "next": "chapter_02"
+    }
+  ],
+  "quests": [
+    {
+      "id": "q_ch1_missing",
+      "name": "The Twenty-Seven",
+      "description": "Find out what happened to the twenty-seven people who vanished when the seventh bell failed.",
+      "stages": ["discover_missing", "inspect_tower", "find_inscription", "survive_first_echo"]
+    }
+  ],
+  "chapter_end_unlocks": ["ashenfall_lower_tower", "bellkeeper_records", "divine_echo_system"]
+}
