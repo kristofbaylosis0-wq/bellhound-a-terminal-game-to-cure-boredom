@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from rpg_core.achievements import evaluate
 from rpg_core.player_service import grant_xp
 from rpg_core.progression import can_use_action, record_action, refresh_prediction
 from rpg_core.save_manager import SaveManager
@@ -24,6 +25,7 @@ class StoryEngine:
         self.state = state
         self.manager = manager
         self.chapters: dict[int, dict[str, Any]] = {}
+        evaluate(self.state)
 
     def _load_chapter(self, chapter: int) -> dict[str, Any]:
         if chapter in self.chapters:
@@ -98,6 +100,9 @@ class StoryEngine:
                 for action in values:
                     record_action(self.state, str(action))
         refresh_prediction(self.state)
+        newly_unlocked = evaluate(self.state)
+        for achievement in newly_unlocked:
+            self.state.history.append(f"achievement:{achievement.id}")
 
     def _apply_items(self, values: dict[str, Any]) -> None:
         inventory = self.state.player.inventory
@@ -133,9 +138,12 @@ class StoryEngine:
     def _actions(self, node: dict[str, Any]) -> str:
         actions = [str(action) for action in node.get("actions", [])]
         available: list[str] = []
-        gated = {"intimidate", "command", "sneak", "listen", "research", "forge", "repair", "treat", "brew"}
         for action in actions:
-            if action in gated and not can_use_action(self.state, action):
+            if node.get("requires_background", {}).get(action):
+                required = str(node["requires_background"][action])
+                if self.state.player.background_id != required:
+                    continue
+            if node.get("requires_action", {}).get(action) and not can_use_action(self.state, action):
                 continue
             available.append(action)
         available.append("continue")
@@ -160,7 +168,6 @@ class StoryEngine:
             if action == 0:
                 damage = max(1, attack - enemy_defense)
                 enemy_hp -= damage
-                record_action(self.state, "kill") if enemy_hp <= 0 else None
                 print(f"\nYou deal {damage} damage.")
             elif action == 1:
                 defending = True
@@ -184,6 +191,10 @@ class StoryEngine:
                 if xp:
                     grant_xp(self.state, xp)
                 player.gold += max(0, gold)
+                self.state.world_flags["survived_encounter"] = True
+                record_action(self.state, "win_fight")
+                self.state.history.append("combat:victory")
+                evaluate(self.state)
                 print(f"\nVictory! +{xp} XP, +{gold} gold.")
                 pause()
                 return combat.get("on_win")
@@ -194,6 +205,7 @@ class StoryEngine:
             print(f"The enemy hits you for {incoming}.")
             if player.hp <= 0:
                 player.hp = 0
+                self.state.history.append("combat:defeat")
                 pause()
                 return combat.get("on_loss")
             pause()
@@ -203,6 +215,8 @@ class StoryEngine:
         if not next_node:
             return False
         if next_node == "chapter_02":
+            self.state.world_flags["chapter_01_complete"] = True
+            evaluate(self.state)
             self.state.chapter = 2
             self.state.current_story_node = "chapter_02"
             clear(); title()
@@ -223,22 +237,22 @@ class StoryEngine:
         while True:
             node = self._node(self.state.current_story_node)
             self._show_node(node)
+            if node.get("type") == "dungeon_entry":
+                self.state.world_flags["entered_below_bell"] = True
             self._apply_effects(node.get("effects"))
-
             if node.get("checkpoint") or node.get("type") == "checkpoint":
                 self.state.checkpoint_node = node["id"]
                 if self.manager:
                     self.manager.save(1, self.state)
+                evaluate(self.state)
                 print("Checkpoint saved.")
                 pause()
-
             combat = node.get("combat")
             if combat:
                 next_node = self._run_combat(combat)
                 if not self._transition(next_node):
                     return
                 continue
-
             choices = node.get("choices") or []
             actions = node.get("actions") or []
             if choices:
@@ -254,9 +268,9 @@ class StoryEngine:
                     record_action(self.state, action)
                     self.state.history.append(f"action:{node['id']}:{action}")
                     next_node = (node.get("action_next") or {}).get(action, node.get("next"))
+                    evaluate(self.state)
             else:
                 next_node = node.get("next")
-
             if not self._transition(next_node):
                 return
 
