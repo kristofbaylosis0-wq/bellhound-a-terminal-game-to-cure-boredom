@@ -12,6 +12,14 @@ from typing import Any
 SAVE_VERSION = 2
 BASE_XP_TO_LEVEL = 100
 START_LOCATION = "ashen-capital-gate"
+DIVINE_DOMAINS = (
+    "strength", "shadows", "knowledge", "war", "life", "death",
+    "storms", "sea", "fate", "freedom", "creation", "forgotten",
+)
+
+
+def default_divine_affinity() -> dict[str, int]:
+    return {domain: 0 for domain in DIVINE_DOMAINS}
 
 
 @dataclass
@@ -24,26 +32,15 @@ class Player:
     stat_points: int = 0
     skill_points: int = 0
     gold: int = 25
-    stats: dict[str, int] = field(
-        default_factory=lambda: {
-            "strength": 5,
-            "agility": 5,
-            "endurance": 5,
-            "intelligence": 5,
-            "willpower": 5,
-            "charisma": 5,
-            "luck": 5,
-        }
-    )
+    stats: dict[str, int] = field(default_factory=lambda: {
+        "strength": 5, "agility": 5, "endurance": 5,
+        "intelligence": 5, "willpower": 5, "charisma": 5, "luck": 5,
+    })
     skills: dict[str, int] = field(default_factory=dict)
     inventory: list[str] = field(default_factory=list)
-    equipment: dict[str, str | None] = field(
-        default_factory=lambda: {
-            "weapon": None,
-            "armor": None,
-            "accessory": None,
-        }
-    )
+    equipment: dict[str, str | None] = field(default_factory=lambda: {
+        "weapon": None, "armor": None, "accessory": None,
+    })
 
     def xp_to_next_level(self) -> int:
         return BASE_XP_TO_LEVEL * self.level
@@ -76,7 +73,10 @@ class Player:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Player":
-        return cls(**data)
+        normalized = dict(data)
+        normalized.setdefault("gold", 25)
+        normalized.setdefault("inventory", [])
+        return cls(**normalized)
 
 
 @dataclass
@@ -84,10 +84,13 @@ class GameState:
     player: Player
     location: str = START_LOCATION
     chapter: int = 1
+    current_story_node: str = "ch1_arrival"
+    checkpoint_node: str = "ch1_arrival"
     world_flags: dict[str, Any] = field(default_factory=dict)
     quest_states: dict[str, str] = field(default_factory=dict)
     relationships: dict[str, int] = field(default_factory=dict)
     faction_reputation: dict[str, int] = field(default_factory=dict)
+    divine_affinity: dict[str, int] = field(default_factory=default_divine_affinity)
     discovered_lore: list[str] = field(default_factory=list)
     history: list[str] = field(default_factory=list)
     random_seed: int | None = None
@@ -98,10 +101,13 @@ class GameState:
             "player": self.player.to_dict(),
             "location": self.location,
             "chapter": self.chapter,
+            "current_story_node": self.current_story_node,
+            "checkpoint_node": self.checkpoint_node,
             "world_flags": self.world_flags,
             "quest_states": self.quest_states,
             "relationships": self.relationships,
             "faction_reputation": self.faction_reputation,
+            "divine_affinity": self.divine_affinity,
             "discovered_lore": self.discovered_lore,
             "history": self.history,
             "random_seed": self.random_seed,
@@ -112,17 +118,21 @@ class GameState:
         version = int(data.get("save_version", 0))
         if version not in {1, SAVE_VERSION}:
             raise ValueError(f"Unsupported save version: {version}")
-        player_data = dict(data["player"])
-        player_data.setdefault("gold", 25)
-        player_data.setdefault("inventory", [])
+        divine = default_divine_affinity()
+        for key, value in data.get("divine_affinity", {}).items():
+            if key in divine:
+                divine[key] = int(value)
         return cls(
-            player=Player.from_dict(player_data),
+            player=Player.from_dict(data["player"]),
             location=data.get("location", START_LOCATION),
             chapter=int(data.get("chapter", 1)),
+            current_story_node=str(data.get("current_story_node", "ch1_arrival")),
+            checkpoint_node=str(data.get("checkpoint_node", data.get("current_story_node", "ch1_arrival"))),
             world_flags=dict(data.get("world_flags", {})),
             quest_states=dict(data.get("quest_states", {})),
             relationships={k: int(v) for k, v in data.get("relationships", {}).items()},
             faction_reputation={k: int(v) for k, v in data.get("faction_reputation", {}).items()},
+            divine_affinity=divine,
             discovered_lore=list(data.get("discovered_lore", [])),
             history=list(data.get("history", [])),
             random_seed=data.get("random_seed"),
