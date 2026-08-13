@@ -18,7 +18,7 @@
     ]},
     {"id":"ch1_key_search","type":"scene","title":"The Black Iron Key","text":["The key is beneath the merchant's counter. It is painfully cold.","Mira stares at the mark stamped into it: a bell surrounded by twelve circles.","'I have seen that symbol beneath the tower,' she whispers."],"effects":{"relationships":{"mira":1},"world_flags":{"knows_bell_symbol":true},"items":{"add":[{"id":"black-iron-key"}]}},"next":"ch1_before_midnight"},
     {"id":"ch1_mira_question","type":"dialogue","title":"Mira's Secret","text":["Mira hesitates.","'Because the key opens a door that the Bellkeepers insist does not exist.'","She looks at the tower. 'And tonight is the first night in seven years that I have been ordered not to go below it.'"],"choices":[
-      {"id":"promise","text":"Promise to help her if something goes wrong.","effects":{"relationships":{"mira":3,"divine_affinity":{"life":1}}},"next":"ch1_before_midnight"},
+      {"id":"promise","text":"Promise to help her if something goes wrong.","effects":{"relationships":{"mira":3,"divine_affinity":{"life":1}},"next":"ch1_before_midnight"},
       {"id":"press","text":"Press her for the whole truth.","effects":{"divine_affinity":{"knowledge":2}},"next":"ch1_mira_truth"},
       {"id":"leave","text":"Leave her to it.","next":"ch1_before_midnight"}
     ]},
@@ -72,7 +72,8 @@
       {"id":"kill","text":"You strike first.","effects":{"divine_affinity":{"death":2,"forgotten":1},"world_flags":{"attacked_hollow_guardian":true}},"next":"ch1_guardian_fight"}
     ]},
     {"id":"ch1_guardian_fight","type":"scene","title":"The Mask Breaks","text":["The figure does not bleed.","When your blow lands, its mask cracks and something golden spills from beneath it.","For one heartbeat, it looks almost human.","Then it whispers: 'Not yet.'"],"effects":{"divine_affinity":{"war":1,"death":1},"world_flags":{"guardian_mask_broken":true}},"next":"ch1_escape"},
-    {"id":"ch1_escape","type":"checkpoint","title":"Dawn Without Twelve Bells","text":["You escape the lower tower before sunrise.","Ashenfall is still standing.","Twenty-seven people are still missing.","The seventh bell is silent.","And for the first time in recorded history, the city begins a day without all twelve bells guarding it."],"effects":{"checkpoint":true,"world_flags":{"chapter_01_complete":true},"quest_states":{"q_ch1_missing":"active"},"xp":120},"next":"chapter_02"}
+    {"id":"ch1_escape","type":"checkpoint","title":"Dawn Without Twelve Bells","text":["You escape the lower tower before sunrise.","Ashenfall is still standing.","Twenty-seven people are still missing.","The seventh bell is silent.","And for the first time in recorded history, the city begins a day without all twelve bells guarding it."],"effects":{"checkpoint":true,"world_flags":{"chapter_01_complete":true},"quest_states":{"q_ch1_missing":"active"},"xp":120},"next":"ch1_checkpoint"},
+    {"id":"ch1_checkpoint","type":"checkpoint","title":"Chapter One — Complete","text":["The first night is over.","Ashenfall survived, twenty-seven people remain missing, and the seventh bell is silent.","Your progress is secured at the end of Chapter One."],"effects":{"world_flags":{"chapter_01_complete":true}},"next":"chapter_02"}
   ],
   "quests":[{"id":"q_ch1_missing","name":"The Twenty-Seven","description":"Discover what happened to the people who vanished when the seventh bell failed.","stages":["witness_bell_failure","search_ashanfall","enter_bell_tower","find_memory_inscription","survive_first_echo"]}],
   "chapter_end_unlocks":["ashenfall_lower_tower","bellkeeper_records","divine_echo_system","chapter_02"]
