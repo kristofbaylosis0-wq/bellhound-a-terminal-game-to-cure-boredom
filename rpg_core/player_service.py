@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from .inventory_service import add_item, equip_item
 from .items import DEFAULT_ITEMS
-from .models import GameState, Player
+from .models import GameState, Player, STORY_MODES
 from .progression import BACKGROUNDS, refresh_prediction
 
 DEFAULT_SEED_STATS = {
@@ -23,16 +23,19 @@ def create_new_game(
     *,
     random_seed: int | None = None,
     background_id: str | None = None,
+    story_mode: str = "handcrafted",
 ) -> GameState:
-    """Create a fresh game with starter gear and an optional background."""
+    """Create a fresh game with starter gear, background, and story mode."""
     name = player_name.strip()
     if not name:
         raise ValueError("Player name cannot be empty")
     if len(name) > 32:
         raise ValueError("Player name cannot exceed 32 characters")
+    if story_mode not in STORY_MODES:
+        raise ValueError(f"Unknown story mode: {story_mode}")
 
     player = Player(name=name, stats=dict(DEFAULT_SEED_STATS))
-    state = GameState(player=player, random_seed=random_seed)
+    state = GameState(player=player, random_seed=random_seed, story_mode=story_mode)
     add_item(state, "rusted-knife")
     add_item(state, "traveler-coat")
     add_item(state, "health-potion", 3)
@@ -49,8 +52,6 @@ def create_new_game(
         for stat, amount in background.bonus_stats.items():
             player.stats[stat] += amount
         for item_id in background.starting_items:
-            # Backgrounds can share the universal starter kit. Non-stackable
-            # equipment should not crash a new game by being awarded twice.
             item = DEFAULT_ITEMS[item_id]
             if not item.stackable and item_id in player.inventory:
                 continue
