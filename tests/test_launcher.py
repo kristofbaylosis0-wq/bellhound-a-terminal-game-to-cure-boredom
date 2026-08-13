@@ -24,7 +24,8 @@ def test_save_load_round_trip(tmp_path: Path) -> None:
 
     loaded = manager.load(2)
     assert loaded.player.name == "Mira"
-    assert loaded.player.level == 2
+    assert loaded.player.level == 3
+    assert loaded.player.xp == 15
     assert loaded.location == "greywater-coast"
 
 
