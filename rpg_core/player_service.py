@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .inventory_service import add_item, equip_item
+from .items import DEFAULT_ITEMS
 from .models import GameState, Player
 from .progression import BACKGROUNDS, refresh_prediction
 
@@ -39,6 +40,8 @@ def create_new_game(
     equip_item(state, "traveler-coat", "armor")
 
     if background_id:
+        if background_id not in BACKGROUNDS:
+            raise ValueError(f"Unknown background: {background_id}")
         background = BACKGROUNDS[background_id]
         player.background_id = background.id
         player.profession = background.id
@@ -46,6 +49,11 @@ def create_new_game(
         for stat, amount in background.bonus_stats.items():
             player.stats[stat] += amount
         for item_id in background.starting_items:
+            # Backgrounds can share the universal starter kit. Non-stackable
+            # equipment should not crash a new game by being awarded twice.
+            item = DEFAULT_ITEMS[item_id]
+            if not item.stackable and item_id in player.inventory:
+                continue
             add_item(state, item_id)
 
     refresh_prediction(state)
