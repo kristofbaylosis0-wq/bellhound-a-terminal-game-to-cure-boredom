@@ -1,0 +1,59 @@
+name: RPG Quality Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f pyproject.toml ]; then pip install -e .; fi
+
+      - name: Compile Python sources
+        run: python -m compileall -q .
+
+      - name: Run tests
+        shell: bash
+        run: |
+          if [ -d tests ]; then
+            python -m pytest -q
+          else
+            echo 'No tests directory found; compile check passed.'
+          fi
+
+      - name: Validate JSON story/data files
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          files = list(Path('.').rglob('*.json'))
+          ignored = {'.git', '.venv', 'venv', 'node_modules'}
+          checked = 0
+          for path in files:
+              if any(part in ignored for part in path.parts):
+                  continue
+              with path.open(encoding='utf-8') as f:
+                  json.load(f)
+              checked += 1
+          print(f'Validated {checked} JSON file(s).')
+          PY
+
+      - name: Smoke test preview import
+        run: python -c "import game.preview; print('Preview import OK')"
