@@ -1,9 +1,4 @@
-"""Deterministic story runner for the handcrafted RPG campaign.
-
-The engine deliberately knows nothing about AI providers. A chapter is a data
-file containing scenes, choices, effects, and transitions. That makes the
-opening campaign fully playable offline once installed.
-"""
+"""Deterministic runner for the handcrafted RPG campaign."""
 
 from __future__ import annotations
 
@@ -11,7 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from rpg_core.progression import record_action, refresh_prediction
+from rpg_core.player_service import grant_xp
+from rpg_core.progression import can_use_action, record_action, refresh_prediction
 from rpg_core.save_manager import SaveManager
 
 from game.ui import clear, menu, pause, title
@@ -49,10 +45,23 @@ class StoryEngine:
 
     def _node(self, node_id: str) -> dict[str, Any]:
         nodes = self._nodes(self.state.chapter)
-        try:
-            return nodes[node_id]
-        except KeyError as exc:
-            raise StoryError(f"Story node not found: {node_id}") from exc
+        if node_id not in nodes:
+            raise StoryError(f"Story node not found: {node_id}")
+        return nodes[node_id]
+
+    def _condition_met(self, conditions: dict[str, Any] | None) -> bool:
+        if not conditions:
+            return True
+        for action in conditions.get("actions", []):
+            if not can_use_action(self.state, str(action)):
+                return False
+        for stat, minimum in conditions.get("min_stat", {}).items():
+            if self.state.player.stats.get(str(stat), 0) < int(minimum):
+                return False
+        for flag in conditions.get("flags", []):
+            if not self.state.world_flags.get(str(flag)):
+                return False
+        return True
 
     def _apply_effects(self, effects: dict[str, Any] | None) -> None:
         if not effects:
@@ -82,7 +91,7 @@ class StoryEngine:
             elif key == "gold":
                 self.state.player.gold += int(values)
             elif key == "xp":
-                self.state.player.add_xp(int(values))
+                grant_xp(self.state, int(values))
             elif key == "checkpoint" and values:
                 self.state.checkpoint_node = self.state.current_story_node
             elif key == "actions":
@@ -96,7 +105,7 @@ class StoryEngine:
             item_id = str(entry["id"])
             quantity = max(0, int(entry.get("quantity", 1)))
             for _ in range(quantity):
-                if item_id not in inventory or item_id in {"health-potion"}:
+                if item_id not in inventory or item_id == "health-potion":
                     inventory.append(item_id)
         for entry in values.get("remove", []):
             item_id = str(entry["id"])
@@ -114,49 +123,103 @@ class StoryEngine:
             print()
 
     def _choose(self, choices: list[dict[str, Any]]) -> dict[str, Any]:
-        labels = [str(choice.get("text", choice.get("id", "Choice"))) for choice in choices]
+        valid = [choice for choice in choices if self._condition_met(choice.get("conditions"))]
+        if not valid:
+            raise StoryError("A story choice has no available options")
+        labels = [str(choice.get("text", choice.get("id", "Choice"))) for choice in valid]
         selected = menu("WHAT DO YOU DO?", labels)
-        return choices[selected]
+        return valid[selected]
 
-    def _actions(self, actions: list[str]) -> str:
-        labels = [str(action).replace("_", " ").title() for action in actions]
-        labels.append("Continue")
-        selected = menu("EXPLORE", labels)
-        if selected == len(actions):
-            return "continue"
-        return actions[selected]
+    def _actions(self, node: dict[str, Any]) -> str:
+        actions = [str(action) for action in node.get("actions", [])]
+        available: list[str] = []
+        gated = {"intimidate", "command", "sneak", "listen", "research", "forge", "repair", "treat", "brew"}
+        for action in actions:
+            if action in gated and not can_use_action(self.state, action):
+                continue
+            available.append(action)
+        available.append("continue")
+        selected = menu(node.get("title", "Explore"), [a.replace("_", " ").title() for a in available])
+        return available[selected]
 
-    def _valid_target(self, next_node: str | None) -> str | None:
-        if not next_node:
-            return None
-        if next_node == "chapter_02":
-            return next_node
-        if next_node not in self._nodes(self.state.chapter):
-            raise StoryError(f"Story points to unknown node '{next_node}' in chapter {self.state.chapter}")
-        return next_node
+    def _run_combat(self, combat: dict[str, Any]) -> str | None:
+        enemy_hp = int(combat.get("hp", 50))
+        enemy_attack = int(combat.get("attack", 8))
+        enemy_defense = int(combat.get("defense", 3))
+        player = self.state.player
+        attack = int(player.stats.get("strength", 5) * 2 + player.level)
+        defense = int(player.stats.get("endurance", 5) * 1.8 + player.level)
+
+        while enemy_hp > 0 and player.hp > 0:
+            clear(); title()
+            print("\nCOMBAT\n")
+            print(f"{player.name}: HP {player.hp}/{player.max_hp}")
+            print(f"Enemy: HP {enemy_hp} | DEF {enemy_defense}\n")
+            action = menu("COMBAT", ["Attack", "Defend", "Use Potion", "Flee"])
+            defending = False
+            if action == 0:
+                damage = max(1, attack - enemy_defense)
+                enemy_hp -= damage
+                record_action(self.state, "kill") if enemy_hp <= 0 else None
+                print(f"\nYou deal {damage} damage.")
+            elif action == 1:
+                defending = True
+                print("\nYou brace yourself.")
+            elif action == 2:
+                if "health-potion" not in player.inventory:
+                    print("\nYou have no health potions.")
+                    pause(); continue
+                player.inventory.remove("health-potion")
+                player.hp = min(player.max_hp, player.hp + 30)
+                record_action(self.state, "heal")
+                print("\nYou recover 30 HP.")
+            else:
+                print("\nYou escape into the darkness.")
+                pause()
+                return combat.get("on_flee") or combat.get("on_loss")
+
+            if enemy_hp <= 0:
+                xp = int(combat.get("reward_xp", 0))
+                gold = int(combat.get("reward_gold", 0))
+                if xp:
+                    grant_xp(self.state, xp)
+                player.gold += max(0, gold)
+                print(f"\nVictory! +{xp} XP, +{gold} gold.")
+                pause()
+                return combat.get("on_win")
+
+            mitigation = defense // 2 if defending else defense // 4
+            incoming = max(1, enemy_attack - mitigation)
+            player.hp -= incoming
+            print(f"The enemy hits you for {incoming}.")
+            if player.hp <= 0:
+                player.hp = 0
+                pause()
+                return combat.get("on_loss")
+            pause()
+        return combat.get("on_win")
 
     def _transition(self, next_node: str | None) -> bool:
-        next_node = self._valid_target(next_node)
         if not next_node:
             return False
         if next_node == "chapter_02":
             self.state.chapter = 2
             self.state.current_story_node = "chapter_02"
-            clear()
-            title()
+            clear(); title()
             print("\nCHAPTER 1 COMPLETE\n")
             print("Ashenfall survived the night.")
-            print("But one of the twelve bells is silent, and twenty-seven people are still missing.")
-            print("\nChapter 2 is coming. Your Chapter 1 checkpoint is safe.")
+            print("One bell is silent. Twenty-seven people are still missing.")
+            print("\nYour Chapter 1 checkpoint is safe.")
             if self.manager:
                 self.manager.save(1, self.state)
             pause()
             return False
+        if next_node not in self._nodes(self.state.chapter):
+            raise StoryError(f"Story points to unknown node '{next_node}' in chapter {self.state.chapter}")
         self.state.current_story_node = next_node
         return True
 
     def run(self) -> None:
-        """Run the handcrafted story until Chapter 1 ends or a later chapter is unavailable."""
         while True:
             node = self._node(self.state.current_story_node)
             self._show_node(node)
@@ -169,6 +232,13 @@ class StoryEngine:
                 print("Checkpoint saved.")
                 pause()
 
+            combat = node.get("combat")
+            if combat:
+                next_node = self._run_combat(combat)
+                if not self._transition(next_node):
+                    return
+                continue
+
             choices = node.get("choices") or []
             actions = node.get("actions") or []
             if choices:
@@ -177,7 +247,7 @@ class StoryEngine:
                 self.state.history.append(f"choice:{node['id']}:{choice.get('id', 'unknown')}")
                 next_node = choice.get("next")
             elif actions:
-                action = self._actions(actions)
+                action = self._actions(node)
                 if action == "continue":
                     next_node = node.get("next")
                 else:
