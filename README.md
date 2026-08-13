@@ -60,9 +60,20 @@ RPG Save1
 
 The available manual save slots are `Save1`, `Save2`, and `Save3`. If you do not remember a save name, use `RPG game` and choose **Boot From Saves**.
 
+## Story modes
+
+Every new game asks which story mode to use:
+
+- **Hard-coded Story** — deterministic handcrafted campaign. AI is not required and the campaign can run offline.
+- **Dynamic Story** — AI-directed presentation and connective scenes. An AI provider and model must be configured first.
+
+Dynamic Story does not give the AI authority over canon game state. The game engine remains authoritative over progression, stats, inventory, resonance, chapter rules, and other permanent state; the AI controls presentation, dialogue, connective scenes, and bounded choice wording.
+
+The selected story mode is stored in the save file, so loading a save resumes the correct story engine automatically.
+
 ## Development
 
-The project is currently building its core systems: AI providers/runtime, persistent game state, player progression, terminal UI, inventory, and world topology. Story, dialogue, quests, characters, and endings will be layered on top of this foundation.
+The project is currently building its core systems: AI providers/runtime, persistent game state, player progression, terminal UI, inventory, combat, resonance, achievements, and world topology. Story, dialogue, quests, characters, and endings are layered on top of this foundation.
 
 ## AI providers
 
