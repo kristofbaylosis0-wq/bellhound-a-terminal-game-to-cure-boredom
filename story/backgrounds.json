@@ -1,0 +1,37 @@
+{
+  "soldier": {
+    "name": "Soldier",
+    "description": "Trained to survive conflict and command under pressure.",
+    "special_actions": ["command", "intimidate", "drill", "formation"]
+  },
+  "thief": {
+    "name": "Thief",
+    "description": "A survivor who learned to go where locks say no.",
+    "special_actions": ["sneak", "pickpocket", "listen", "appraise"]
+  },
+  "scholar": {
+    "name": "Scholar",
+    "description": "A researcher trained to find meaning in forgotten things.",
+    "special_actions": ["research", "translate", "identify", "teach"]
+  },
+  "healer": {
+    "name": "Healer",
+    "description": "A practical medic who learned to save lives with little.",
+    "special_actions": ["treat", "diagnose", "brew"]
+  },
+  "merchant": {
+    "name": "Merchant",
+    "description": "A trader who knows what something is worth before the buyer does.",
+    "special_actions": ["haggle", "appraise", "negotiate", "trade"]
+  },
+  "craftsperson": {
+    "name": "Craftsperson",
+    "description": "A maker comfortable turning raw material into useful things.",
+    "special_actions": ["forge", "repair", "salvage", "craft"]
+  },
+  "wanderer": {
+    "name": "Wanderer",
+    "description": "A traveler with no master and a talent for finding another road.",
+    "special_actions": ["scout", "forage", "navigate", "improvise"]
+  }
+}
