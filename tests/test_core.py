@@ -18,14 +18,14 @@ def test_leveling_and_stat_points() -> None:
 
     assert gained == 1
     assert state.player.level == 2
-    assert state.player.stat_points == 2
+    assert state.player.stat_points == 3
     assert state.player.skill_points == 1
     assert state.player.max_hp == 110
     assert state.player.hp == 110
 
     spend_stat_point(state, "strength")
     assert state.player.stats["strength"] == 6
-    assert state.player.stat_points == 1
+    assert state.player.stat_points == 2
 
 
 def test_save_load_round_trip(tmp_path: Path) -> None:
