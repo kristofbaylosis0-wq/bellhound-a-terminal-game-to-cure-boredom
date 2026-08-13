@@ -9,7 +9,7 @@ An open-source AI-assisted terminal text RPG built collaboratively with ChatGPT.
 Run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kristofbaylosis0-wq/idk/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kristofbaylosis0-wq/bellhound-a-terminal-game-to-cure-boredom/main/install.sh | bash
 ```
 
 The installer is intentionally quiet: Git and pip output are hidden while a small progress display shows what is happening. When installation finishes, the game automatically boots.
@@ -19,7 +19,7 @@ The installer is intentionally quiet: Git and pip output are hidden while a smal
 Windows Terminal + PowerShell is supported too. Run:
 
 ```powershell
-irm https://raw.githubusercontent.com/kristofbaylosis0-wq/idk/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/kristofbaylosis0-wq/bellhound-a-terminal-game-to-cure-boredom/main/install.ps1 | iex
 ```
 
 The PowerShell installer downloads the repository, creates the Python virtual environment, installs the RPG, creates an `RPG` launcher in your user `bin` directory, updates your user `PATH`, and automatically boots the game.
