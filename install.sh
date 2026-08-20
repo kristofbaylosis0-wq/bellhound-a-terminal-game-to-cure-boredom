@@ -19,7 +19,7 @@ fail() {
 
 printf '\n'
 printf '  ╭──────────────────────────────────────────────╮\n'
-printf '  │       A TEXT RPG GAME MADE BY CHATGPT       │\n'
+printf '  │    A TEXT RPG GAME MADE BY CHATGPT + MANUS  │\n'
 printf '  ╰──────────────────────────────────────────────╯\n\n'
 printf '  Installing RPG...\n\n'
 

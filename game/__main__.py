@@ -14,7 +14,7 @@ from story.engine import StoryEngine
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="RPG",
-        description="A text RPG game made by ChatGPT",
+        description="A text RPG game made by ChatGPT and Manus",
     )
     parser.add_argument(
         "target",

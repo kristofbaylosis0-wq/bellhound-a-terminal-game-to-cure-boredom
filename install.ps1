@@ -9,7 +9,7 @@ function Step($Text) { Write-Host "  • $Text" }
 function Done($Text) { Write-Host "  ✓ $Text" }
 
 Write-Host ''
-Write-Host '  A TEXT RPG GAME MADE BY CHATGPT' -ForegroundColor Cyan
+Write-Host '  A TEXT RPG GAME MADE BY CHATGPT + MANUS' -ForegroundColor Cyan
 Write-Host ''
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {

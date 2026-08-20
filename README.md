@@ -1,6 +1,6 @@
-# A text RPG game made by ChatGPT
+# A text RPG game made by ChatGPT and Manus
 
-An open-source AI-assisted terminal text RPG built collaboratively with ChatGPT.
+An open-source AI-assisted terminal text RPG built collaboratively with ChatGPT and Manus.
 
 ## Install + launch
 

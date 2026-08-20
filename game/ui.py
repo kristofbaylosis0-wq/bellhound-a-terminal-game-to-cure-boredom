@@ -42,7 +42,7 @@ def pause(message: str = "Press Enter to continue...") -> None:
 
 def title() -> None:
     print("╔══════════════════════════════════════════════╗")
-    print("║       A TEXT RPG GAME MADE BY CHATGPT      ║")
+    print("║    A TEXT RPG GAME MADE BY CHATGPT + MANUS ║")
     print("╚══════════════════════════════════════════════╝")
 
 
