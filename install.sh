@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://github.com/kristofbaylosis0-wq/idk.git"
+REPO_URL="https://github.com/kristofbaylosis0-wq/bellhound-a-terminal-game-to-cure-boredom.git"
 INSTALL_ROOT="${HOME}/.local/share/text-rpg-chatgpt"
 BIN_DIR="${HOME}/.local/bin"
 RPG_COMMAND="${BIN_DIR}/RPG"

@@ -193,3 +193,35 @@ def test_chapter_one_has_an_expanded_investigation_arc() -> None:
     assert "Rowan" in all_text
     assert "Elian Marr" in all_text
     assert "Vesper Rill" in all_text
+
+
+def test_every_major_path_has_an_extended_intermediate_scene() -> None:
+    data = json.loads(CHAPTER.read_text(encoding="utf-8"))
+    beats = {node["id"]: node for node in data["beats"]}
+
+    mira = beats["ch1_mira_reaction"]
+    assert '"next":"ch1_mira_investigation"' in json.dumps(mira, ensure_ascii=False, separators=(",", ":"))
+
+    tower = beats["ch1_tower_entry"]
+    tower_targets = {choice.get("next") for choice in tower["choices"]}
+    assert "ch1_stairwell_choice" in tower_targets
+
+    abandon = beats["ch1_abandon_tower"]
+    abandon_targets = {choice.get("next") for choice in abandon["choices"]}
+    assert "ch1_abandon_city" in abandon_targets
+
+    guardian = beats["ch1_hollow_guardian"]
+    guardian_targets = {choice.get("next") for choice in guardian["choices"]}
+    assert "ch1_guardian_question" in guardian_targets
+
+    required = {
+        "ch1_mira_investigation",
+        "ch1_mira_evidence",
+        "ch1_stairwell_choice",
+        "ch1_maintenance_alcove",
+        "ch1_mira_echo",
+        "ch1_abandon_city",
+        "ch1_abandon_witness",
+        "ch1_guardian_question",
+    }
+    assert required.issubset(beats)

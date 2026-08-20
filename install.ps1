@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-$Repo = 'https://github.com/kristofbaylosis0-wq/idk.git'
+$Repo = 'https://github.com/kristofbaylosis0-wq/bellhound-a-terminal-game-to-cure-boredom.git'
 $InstallDir = Join-Path $HOME '.text-rpg-chatgpt'
 $LauncherDir = Join-Path $HOME 'bin'
 $Launcher = Join-Path $LauncherDir 'RPG.ps1'
