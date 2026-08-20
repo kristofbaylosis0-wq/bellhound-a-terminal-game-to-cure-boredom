@@ -16,6 +16,7 @@ def test_chapter_one_json_is_valid_and_has_a_complete_node_graph() -> None:
     beats = {node["id"]: node for node in data["beats"]}
     assert data["mode"] == "handcrafted"
     assert data["ai_required"] is False
+    assert data["target_playtime_minutes"] == 60
     assert "ch1_arrival" in beats
     assert "ch1_checkpoint" in beats
 
@@ -165,3 +166,30 @@ def test_three_dawn_rewards_are_distinct_and_persistent() -> None:
     assert state.world_flags["chapter1_dawn"] == "hollow"
     assert "hollow-mark" in state.player.inventory
     assert state.relationship_states["mira"] == "opposed"
+
+
+def test_chapter_one_has_an_expanded_investigation_arc() -> None:
+    data = json.loads(CHAPTER.read_text(encoding="utf-8"))
+    beats = {node["id"]: node for node in data["beats"]}
+    assert len(beats) >= 39
+    assert sum(node.get("type") == "combat" for node in beats.values()) >= 2
+
+    before_midnight = beats["ch1_before_midnight"]
+    actions = set(before_midnight["actions"])
+    assert {"visit_market", "visit_tavern", "visit_scholar_quarter"}.issubset(actions)
+
+    expanded_nodes = {
+        "ch1_market_aftershock",
+        "ch1_tavern_aftershock",
+        "ch1_scholar_aftershock",
+        "ch1_second_house",
+        "ch1_footprint_encounter",
+        "ch1_footprint_chamber",
+        "ch1_footprint_victory",
+    }
+    assert expanded_nodes.issubset(beats)
+    all_text = " ".join(" ".join(node.get("text", [])) for node in beats.values())
+    assert "Nessa Vale" in all_text
+    assert "Rowan" in all_text
+    assert "Elian Marr" in all_text
+    assert "Vesper Rill" in all_text

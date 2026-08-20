@@ -30,4 +30,4 @@ The player begins as an unknown traveler arriving at the gates of the Ashen Capi
 - Act V — The Last Choice
 - Epilogues — outcome-dependent
 
-The full campaign is designed around roughly three hours for a focused first playthrough, with substantially more time available for exploration, optional quests, secrets, and alternate routes.
+The currently implemented handcrafted Chapter 1 targets roughly 45–75 minutes for a first playthrough, depending on investigation choices and optional encounters. The full campaign is designed around roughly three hours for a focused first playthrough, with substantially more time available for exploration, optional quests, secrets, and alternate routes.
