@@ -186,7 +186,8 @@ def run_dynamic(manager: SaveManager, state: Any, *, save_slot: int) -> None:
             print("Checkpoint saved.\n")
             pause()
 
-        selected = menu("WHAT DO YOU DO?", [choice["text"] for choice in scene["choices"]])
+        context = [scene["title"], *scene["narration"]]
+        selected = menu("WHAT DO YOU DO?", [choice["text"] for choice in scene["choices"]], context=context)
         action = scene["choices"][selected]["action"]
         history.append(f"{scene['title']} -> {action}")
         record_action(state, action)

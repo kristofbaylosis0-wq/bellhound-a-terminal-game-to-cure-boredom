@@ -167,12 +167,12 @@ class StoryEngine:
             print(paragraph)
             print()
 
-    def _choose(self, choices: list[dict[str, Any]]) -> dict[str, Any]:
+    def _choose(self, choices: list[dict[str, Any]], *, context: list[str] | None = None) -> dict[str, Any]:
         valid = [choice for choice in choices if self._condition_met(choice.get("conditions"))]
         if not valid:
             raise StoryError("A story choice has no available options")
         labels = [str(choice.get("text", choice.get("id", "Choice"))) for choice in valid]
-        selected = menu("WHAT DO YOU DO?", labels)
+        selected = menu("WHAT DO YOU DO?", labels, context=context)
         return valid[selected]
 
     def _route_next(self, node: dict[str, Any]) -> str | None:
@@ -192,7 +192,8 @@ class StoryEngine:
                 continue
             available.append(action)
         available.append("continue")
-        selected = menu(node.get("title", "Explore"), [a.replace("_", " ").title() for a in available])
+        context = [node.get("title", "Explore"), *[str(paragraph) for paragraph in node.get("text", [])]]
+        selected = menu(node.get("title", "Explore"), [a.replace("_", " ").title() for a in available], context=context)
         return available[selected]
 
     def _select_save(self) -> int | None:
@@ -359,7 +360,7 @@ class StoryEngine:
             choices = node.get("choices") or []
             actions = node.get("actions") or []
             if choices:
-                choice = self._choose(choices)
+                choice = self._choose(choices, context=[node.get("title", "Story"), *[str(paragraph) for paragraph in node.get("text", [])]])
                 self._apply_effects(choice.get("effects"))
                 self.state.history.append(f"choice:{node['id']}:{choice.get('id', 'unknown')}")
                 next_node = choice.get("next")

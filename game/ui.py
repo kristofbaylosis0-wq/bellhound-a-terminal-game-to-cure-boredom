@@ -46,10 +46,15 @@ def title() -> None:
     print("╚══════════════════════════════════════════════╝")
 
 
-def menu(title_text: str, options: list[str], *, footer: str = "Use ↑/↓ and Enter, or type a number.") -> int:
+def menu(title_text: str, options: list[str], *, footer: str = "Use ↑/↓ and Enter, or type a number.", context: list[str] | None = None) -> int:
     selected = 0
     while True:
         clear()
+        if context:
+            for paragraph in context:
+                print(paragraph)
+                print()
+            print("─" * 46)
         print("╔══════════════════════════════════════════════╗")
         print(f"║ {title_text[:44].center(44)} ║")
         print("╠══════════════════════════════════════════════╣")
