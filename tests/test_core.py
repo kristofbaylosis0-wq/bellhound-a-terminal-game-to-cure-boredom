@@ -32,6 +32,8 @@ def test_save_load_round_trip(tmp_path: Path) -> None:
     state = create_new_game("TestPlayer", random_seed=1234)
     state.location = "old_market"
     state.relationships["mira"] = 72
+    state.relationship_states["mira"] = "trusted"
+    state.evidence.extend(["black_iron_key", "mira_trusts_player"])
     state.world_flags["found_key"] = True
     grant_xp(state, 150)
 

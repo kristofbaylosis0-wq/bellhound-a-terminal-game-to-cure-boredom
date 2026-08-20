@@ -109,9 +109,11 @@ class GameState:
     world_flags: dict[str, Any] = field(default_factory=dict)
     quest_states: dict[str, str] = field(default_factory=dict)
     relationships: dict[str, int] = field(default_factory=dict)
+    relationship_states: dict[str, str] = field(default_factory=dict)
     faction_reputation: dict[str, int] = field(default_factory=dict)
     divine_affinity: dict[str, float] = field(default_factory=default_divine_affinity)
     discovered_lore: list[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
     history: list[str] = field(default_factory=list)
     achievements: list[str] = field(default_factory=list)
     random_seed: int | None = None
@@ -132,9 +134,11 @@ class GameState:
             "world_flags": self.world_flags,
             "quest_states": self.quest_states,
             "relationships": self.relationships,
+            "relationship_states": self.relationship_states,
             "faction_reputation": self.faction_reputation,
             "divine_affinity": self.divine_affinity,
             "discovered_lore": self.discovered_lore,
+            "evidence": self.evidence,
             "history": self.history,
             "achievements": self.achievements,
             "random_seed": self.random_seed,
@@ -159,9 +163,11 @@ class GameState:
             world_flags=dict(data.get("world_flags", {})),
             quest_states=dict(data.get("quest_states", {})),
             relationships={k: int(v) for k, v in data.get("relationships", {}).items()},
+            relationship_states={k: str(v) for k, v in data.get("relationship_states", {}).items()},
             faction_reputation={k: int(v) for k, v in data.get("faction_reputation", {}).items()},
             divine_affinity=divine,
             discovered_lore=list(data.get("discovered_lore", [])),
+            evidence=list(data.get("evidence", [])),
             history=list(data.get("history", [])),
             achievements=list(data.get("achievements", [])),
             random_seed=data.get("random_seed"),

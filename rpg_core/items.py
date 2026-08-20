@@ -65,6 +65,26 @@ DEFAULT_ITEMS: dict[str, Item] = {
         description="A torn record describing a bell that must never be allowed to fail.", rarity="uncommon",
         stackable=True, max_stack=5, weight=0.0, value=0, tags=["quest", "lore", "bellkeeper"],
     ),
+    "echo-shard": Item(
+        id="echo-shard", name="Echo Shard", item_type="quest",
+        description="A splinter of memory-glass left behind by the creature beneath the bell.", rarity="rare",
+        stackable=False, weight=0.1, value=0, tags=["quest", "lore", "resonance"],
+    ),
+    "bellkeeper-seal": Item(
+        id="bellkeeper-seal", name="Bellkeeper Seal", item_type="quest",
+        description="A brass seal that grants limited passage through Bellkeeper territory.", rarity="uncommon",
+        stackable=False, weight=0.1, value=0, tags=["quest", "faction", "bellkeeper"],
+    ),
+    "crown-writ": Item(
+        id="crown-writ", name="Crown Writ", item_type="quest",
+        description="An official order stating that your investigation is now under Crown authority.", rarity="uncommon",
+        stackable=False, weight=0.0, value=0, tags=["quest", "faction", "crown"],
+    ),
+    "hollow-mark": Item(
+        id="hollow-mark", name="Hollow Mark", item_type="quest",
+        description="A dark mark left by the underground when it decides you have been noticed.", rarity="rare",
+        stackable=False, weight=0.0, value=0, tags=["quest", "faction", "hollow"],
+    ),
 }
 
 

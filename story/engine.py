@@ -74,6 +74,23 @@ class StoryEngine:
         for stat, minimum in conditions.get("min_stat", {}).items():
             if self.state.player.stats.get(str(stat), 0) < int(minimum):
                 return False
+        backgrounds = conditions.get("backgrounds", [])
+        if backgrounds and self.state.player.background_id not in {str(item) for item in backgrounds}:
+            return False
+        for item in conditions.get("has_items", []):
+            if str(item) not in self.state.player.inventory:
+                return False
+        for person, expected in conditions.get("relationship_states", {}).items():
+            actual = self.state.relationship_states.get(str(person), "uncertain")
+            expected_states = {str(expected)} if isinstance(expected, str) else {str(item) for item in expected}
+            if actual not in expected_states:
+                return False
+        for clue in conditions.get("evidence", []):
+            if str(clue) not in self.state.evidence:
+                return False
+        for faction, minimum in conditions.get("min_reputation", {}).items():
+            if self.state.faction_reputation.get(str(faction), 0) < int(minimum):
+                return False
         for flag in conditions.get("flags", []):
             if not self.state.world_flags.get(str(flag)):
                 return False
@@ -91,6 +108,14 @@ class StoryEngine:
             elif key == "relationships":
                 for person, amount in values.items():
                     self.state.relationships[person] = self.state.relationships.get(person, 0) + int(amount)
+            elif key == "relationship_states":
+                for person, state in values.items():
+                    self.state.relationship_states[str(person)] = str(state)
+            elif key == "evidence":
+                for clue in values:
+                    clue = str(clue)
+                    if clue not in self.state.evidence:
+                        self.state.evidence.append(clue)
             elif key == "faction_reputation":
                 for faction, amount in values.items():
                     self.state.faction_reputation[faction] = self.state.faction_reputation.get(faction, 0) + int(amount)
@@ -149,6 +174,12 @@ class StoryEngine:
         labels = [str(choice.get("text", choice.get("id", "Choice"))) for choice in valid]
         selected = menu("WHAT DO YOU DO?", labels)
         return valid[selected]
+
+    def _route_next(self, node: dict[str, Any]) -> str | None:
+        for route in node.get("routes", []):
+            if self._condition_met(route.get("conditions")):
+                return route.get("next")
+        return node.get("fallback") or node.get("next")
 
     def _actions(self, node: dict[str, Any]) -> str:
         actions = [str(action) for action in node.get("actions", [])]
@@ -317,6 +348,11 @@ class StoryEngine:
                 next_node = self._run_combat(combat)
                 if next_node == "__retry__":
                     continue
+                if not self._transition(next_node):
+                    return
+                continue
+            if node.get("routes"):
+                next_node = self._route_next(node)
                 if not self._transition(next_node):
                     return
                 continue
